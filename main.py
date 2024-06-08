@@ -93,6 +93,10 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/lasso_summary_1.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q7.html}-->
 """
 # %%
@@ -114,6 +118,10 @@
 # %% [markdown]
 """
 <!--*!{sections/comments/q8-comment.md}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/double_lasso_summary_1.md}-->
 """
 # %% [markdown]
 """
@@ -141,6 +149,10 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/lasso_summary_2.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q11.html}-->
 """
 # %%
@@ -162,4 +174,8 @@
 # %% [markdown]
 """
 <!--*!{sections/comments/q12-comment.md}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/double_lasso_summary_2.md}-->
 """
