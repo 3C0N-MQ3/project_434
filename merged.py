@@ -168,7 +168,7 @@ result2 = model2.fit()
 # Print the summaries to check the fixed effects inclusion
 print(result2.summary)
 # %% [markdown]
-#
+# To account for bias across agencies and within time, we use fixed effects. Using this model, we estimate a 3.54% decrease in ridership, suggesting that Uber substitutes public transit. Higher population estimates are associated with an increase in ridership, in contrast to the previous model, while higher employment levels are linked to an increase. Higher average fares negatively affect ridership, while more vehicle hours and miles significantly increase ridership. The results also suggest that more vehicles in service increase ridership, and, paradoxically, gas prices have a negative but significant effect, unlike in the first OLS model.
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -188,7 +188,7 @@ result3 = model3.fit()
 
 print(result3.summary)
 # %% [markdown]
-#
+# We expand our analysis to examine how the effect of Uber differs based on the population of the MSA. We add $$P_{it}$$, a dummy variable that takes a value of 1 if the population is larger than the median population in the dataset and 0 otherwise. Using this model, we estimate a 0.75% increase in ridership, which is not statistically significant. Higher average fares negatively affect ridership, while more vehicle hours and miles seem to slightly increase ridership. The results also suggest that more vehicles in service significantly increase ridership, while more vehicle miles slightly decrease it. Again, gas prices do not have a significant effect in this model. Overall, we observe that the majority of the coefficients are very close to 0, with confidence intervals indicating that they could have either a positive or negative overall effect on ridership.
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -208,21 +208,22 @@ result4 = model4.fit()
 
 print(result4.summary)
 # %% [markdown]
-#
+# Instead of examining how the effect of Uber differs based on the population, we now account for heterogeneity based on the number of riders using public transit before Uber arrived. We add $$F_{it}$$, a dummy variable that takes a value of 1 if the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies in the dataset. Using this model, we estimate a 3.09% decrease in ridership, suggesting that Uber substitutes public transit. Apart from that important difference, the rest of the control variables are similar in both magnitude and sign to those observed in regression 3.
 # %% [markdown]
-"""
-| Variable         | OLS Coefficient | PanelOLS 1 Coefficient | PanelOLS 2 Coefficient | PanelOLS 3 Coefficient |
-|------------------|------------------|------------------------|------------------------|------------------------|
-| Intercept        | -0.7976          | N/A                    | N/A                    | N/A                    |
-| treatUberX       | 0.0382           | -0.0354                | 0.0075                 | -0.0309                |
-| popestimate      | -0.9271          | 0.2789                 | -9.98e-08              | -1.038e-07             |
-| employment       | 0.9909           | 0.2677                 | 1.769e-07              | 1.737e-07              |
-| aveFareTotal     | -0.1277          | -0.0996                | -0.0012                | -0.0012                |
-| VRHTotal         | 1.3417           | 0.3052                 | 8.564e-07              | 8.576e-07              |
-| VOMSTotal        | -0.2376          | 0.2314                 | 0.0005                 | 0.0005                 |
-| VRMTotal         | 0.0688           | 0.2664                 | -2.596e-08             | -2.602e-08             |
-| gasPrice         | 0.2136           | -0.0407                | -0.0096                | -0.0101                |
-"""
+# | Variable         | OLS 1 | OLS 2 | OLS 3 | OLS 4 |
+# |------------------|------------------|------------------------|------------------------|------------------------|
+# | Intercept        | -0.7976          | N/A                    | N/A                    | N/A                    |
+# | treatUberX       | 0.0382           | -0.0354                | 0.0075                 | -0.0309                |
+# | popestimate      | -0.9271          | 0.2789                 | -9.98e-08              | -1.038e-07             |
+# | employment       | 0.9909           | 0.2677                 | 1.769e-07              | 1.737e-07              |
+# | aveFareTotal     | -0.1277          | -0.0996                | -0.0012                | -0.0012                |
+# | VRHTotal         | 1.3417           | 0.3052                 | 8.564e-07              | 8.576e-07              |
+# | VOMSTotal        | -0.2376          | 0.2314                 | 0.0005                 | 0.0005                 |
+# | VRMTotal         | 0.0688           | 0.2664                 | -2.596e-08             | -2.602e-08             |
+# | gasPrice         | 0.2136           | -0.0407                | -0.0096                | -0.0101                |
+#
+#
+# Overall, the OLS models indicate that we cannot definitively determine whether the effect of Uber on public transit was complementary or supplementary. The results are not robust across regressions, and therefore, we cannot establish causality. This inconsistency suggests that further analysis with more rigorous methods is needed to understand the true impact of Uber on public transit ridership. Below, we try to address these problems using LASSO and double LASSO regression techniques.
 
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
