@@ -24,11 +24,19 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/q1-comment.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q2.html}-->
 """
 # %%
 """
 <py!--*!{sections/code_chunks/q2.py}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/q2-comment.md}-->
 """
 # %% [markdown]
 """
@@ -40,11 +48,19 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/q3-comment.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q4.html}-->
 """
 # %%
 """
 <py!--*!{sections/code_chunks/q4.py}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/q4-comment.md}-->
 """
 # %% [markdown]
 """
@@ -56,11 +72,19 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/q5-comment.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q6.html}-->
 """
 # %%
 """
 <py!--*!{sections/code_chunks/q6.py}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/q6-comment.md}-->
 """
 # %% [markdown]
 """
@@ -72,11 +96,19 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/q7-comment.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q8.html}-->
 """
 # %%
 """
 <py!--*!{sections/code_chunks/q8.py}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/q8-comment.md}-->
 """
 # %% [markdown]
 """
@@ -88,11 +120,19 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/q9-comment.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q10.html}-->
 """
 # %%
 """
 <py!--*!{sections/code_chunks/q10.py}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/q10-comment.md}-->
 """
 # %% [markdown]
 """
@@ -104,9 +144,17 @@
 """
 # %% [markdown]
 """
+<!--*!{sections/comments/q11-comment.md}-->
+"""
+# %% [markdown]
+"""
 <!--*!{sections/questions/q12.html}-->
 """
 # %%
 """
 <py!--*!{sections/code_chunks/q12.py}-->
+"""
+# %% [markdown]
+"""
+<!--*!{sections/comments/q12-comment.md}-->
 """
