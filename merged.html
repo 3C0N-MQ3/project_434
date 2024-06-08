@@ -7521,7 +7521,7 @@ a.anchor-link {
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=52988e89">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fc46a6e5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7536,7 +7536,7 @@ a.anchor-link {
 <p><em>Luis-Alejandro Samayoa-Alvarado</em><br/>
 <p><em>Mauricio Vargas-Estrada</em><br/>
 <p><em>Nikolas Papadatos</em><br/>
-<p><em>William Borelli</em><br/>
+<p><em>William Borelli Ebert</em><br/>
 <p>Master of Quantitative Economics<br/>
         University of California - Los Angeles</p>
 <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));"/>
@@ -7546,7 +7546,7 @@ a.anchor-link {
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=caecd454">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=52988e89">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7572,8 +7572,82 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=152bde52">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=aaaae8c8">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Lasso</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">linearmodels.panel</span> <span class="kn">import</span> <span class="n">PanelOLS</span>
+
+<span class="kn">from</span> <span class="nn">src.BCCH</span> <span class="kn">import</span> <span class="n">BCCH</span>
+<span class="kn">from</span> <span class="nn">src.double_lasso</span> <span class="kn">import</span> <span class="n">double_lasso</span>
+<span class="kn">from</span> <span class="nn">src.double_lasso_OLS</span> <span class="kn">import</span> <span class="n">double_lasso_OLS</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3f10f679">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"data/uber_dataset.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Drop treatGTNotStd variable</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">'treatGTNotStd'</span><span class="p">)</span>
+
+<span class="c1"># Drop rows with missing values</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="c1"># If treatUberX is greater than 0.5, set it to 1, if not, set it to 0</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># Create interaction between agency and city</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'agency_city'</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'agency'</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">'city'</span><span class="p">]</span>
+
+<span class="c1"># Calculate the median population </span>
+<span class="n">data_copy</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">'UPTTotal'</span><span class="p">,</span> <span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'city'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">data_copy</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'city'</span><span class="p">])</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<span class="n">median_population</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">'popestimate'</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+
+<span class="c1"># Create the dummy variable P_{it}</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'popestimate'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">median_population</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># Calculate the median rides </span>
+<span class="n">median_rides</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+
+<span class="c1"># Create the dummy variable F_{it}</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">median_rides</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># Create the interaction term P_{it} * D_{it}</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'PxD'</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
+
+<span class="c1"># Create the interaction term F_{it} * D_{it}</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'FxD'</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1c511bed">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7590,8 +7664,114 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f39e9bef">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3792d8dd">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Convert 'dateSurvey' to datetime format</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">'dateSurvey'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'dateSurvey'</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'coerce'</span><span class="p">)</span>
+
+<span class="c1"># Set the index to be a MultiIndex for panel data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">'agency_city'</span><span class="p">,</span> <span class="s1">'dateSurvey'</span><span class="p">])</span>
+
+<span class="c1"># Define the dependent variable and independent variables</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">])</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]]</span>
+<span class="n">PxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'PxD'</span><span class="p">]</span>
+<span class="n">FxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'FxD'</span><span class="p">]</span>
+
+<span class="c1"># Scale the independent variables with log transformation</span>
+<span class="n">W_scaled_df</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+
+<span class="c1"># Create the design matrices</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Add constant to the models</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=38a8e744">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Fit the OLS model</span>
+<span class="n">model1</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Print the results</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model1</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:               UPTTotal   R-squared:                       0.833
+Model:                            OLS   Adj. R-squared:                  0.833
+Method:                 Least Squares   F-statistic:                 4.463e+04
+Date:                Fri, 07 Jun 2024   Prob (F-statistic):               0.00
+Time:                        20:17:23   Log-Likelihood:                -84548.
+No. Observations:               71768   AIC:                         1.691e+05
+Df Residuals:                   71759   BIC:                         1.692e+05
+Df Model:                           8                                         
+Covariance Type:            nonrobust                                         
+================================================================================
+                   coef    std err          t      P&gt;|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+const           -0.7976      0.068    -11.676      0.000      -0.931      -0.664
+treatUberX       0.0382      0.010      3.890      0.000       0.019       0.057
+popestimate     -0.9271      0.034    -27.371      0.000      -0.994      -0.861
+employment       0.9909      0.034     29.363      0.000       0.925       1.057
+aveFareTotal    -0.1277      0.004    -32.388      0.000      -0.135      -0.120
+VRHTotal         1.3417      0.009    143.916      0.000       1.323       1.360
+VOMSTotal       -0.2376      0.008    -30.390      0.000      -0.253      -0.222
+VRMTotal         0.0688      0.011      6.400      0.000       0.048       0.090
+gasPrice         0.2136      0.013     16.540      0.000       0.188       0.239
+==============================================================================
+Omnibus:                     9050.948   Durbin-Watson:                   0.080
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):           106297.994
+Skew:                          -0.089   Prob(JB):                         0.00
+Kurtosis:                       8.959   Cond. No.                         606.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dd3c6d85">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c98372a5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7608,8 +7788,93 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a5612340">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3b4b0986">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Ensure Y is a Series rather than a DataFrame</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+<span class="c1"># Create the design matrices</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Fit the Panel OLS models with individual and time fixed effects</span>
+<span class="n">model2</span> <span class="o">=</span> <span class="n">PanelOLS</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">entity_effects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">time_effects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_absorbed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">result2</span> <span class="o">=</span> <span class="n">model2</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Print the summaries to check the fixed effects inclusion</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result2</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>                          PanelOLS Estimation Summary                           
+================================================================================
+Dep. Variable:               UPTTotal   R-squared:                        0.3295
+Estimator:                   PanelOLS   R-squared (Between):              0.9395
+No. Observations:               71768   R-squared (Within):               0.3476
+Date:                Fri, Jun 07 2024   R-squared (Overall):              0.9503
+Time:                        20:17:24   Log-likelihood                   -5543.7
+Cov. Estimator:            Unadjusted                                           
+                                        F-statistic:                      4357.3
+Entities:                         676   P-value                           0.0000
+Avg Obs:                       106.17   Distribution:                 F(8,70941)
+Min Obs:                       6.0000                                           
+Max Obs:                       144.00   F-statistic (robust):             4357.3
+                                        P-value                           0.0000
+Time periods:                     144   Distribution:                 F(8,70941)
+Avg Obs:                       498.39                                           
+Min Obs:                       161.00                                           
+Max Obs:                       586.00                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+treatUberX      -0.0354     0.0051    -6.9140     0.0000     -0.0454     -0.0254
+popestimate      0.2789     0.0556     5.0147     0.0000      0.1699      0.3878
+employment       0.2677     0.0397     6.7474     0.0000      0.1899      0.3455
+aveFareTotal    -0.0996     0.0030    -33.542     0.0000     -0.1054     -0.0938
+VRHTotal         0.3052     0.0071     43.084     0.0000      0.2913      0.3190
+VOMSTotal        0.2314     0.0058     40.090     0.0000      0.2201      0.2427
+VRMTotal         0.2664     0.0071     37.501     0.0000      0.2525      0.2803
+gasPrice        -0.0407     0.0394    -1.0337     0.3013     -0.1179      0.0365
+================================================================================
+
+F-test for Poolability: 697.27
+P-value: 0.0000
+Distribution: F(818,70941)
+
+Included effects: Entity, Time
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9f3130a6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=144c2269">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7626,8 +7891,90 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d48975ae">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fc41dbcc">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create the design matrices</span>
+<span class="n">X1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">PxD</span><span class="p">,</span> <span class="n">W</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Fit the Panel OLS models with individual and time fixed effects</span>
+<span class="n">model3</span> <span class="o">=</span> <span class="n">PanelOLS</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X1</span><span class="p">,</span> <span class="n">entity_effects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">time_effects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_absorbed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">result3</span> <span class="o">=</span> <span class="n">model3</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result3</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>                          PanelOLS Estimation Summary                           
+================================================================================
+Dep. Variable:               UPTTotal   R-squared:                        0.0103
+Estimator:                   PanelOLS   R-squared (Between):              0.0023
+No. Observations:               71768   R-squared (Within):              -0.0002
+Date:                Fri, Jun 07 2024   R-squared (Overall):              0.0062
+Time:                        20:17:26   Log-likelihood                -1.951e+04
+Cov. Estimator:            Unadjusted                                           
+                                        F-statistic:                      82.066
+Entities:                         676   P-value                           0.0000
+Avg Obs:                       106.17   Distribution:                 F(9,70940)
+Min Obs:                       6.0000                                           
+Max Obs:                       144.00   F-statistic (robust):             82.066
+                                        P-value                           0.0000
+Time periods:                     144   Distribution:                 F(9,70940)
+Avg Obs:                       498.39                                           
+Min Obs:                       161.00                                           
+Max Obs:                       586.00                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+treatUberX       0.0075     0.0177     0.4253     0.6706     -0.0272      0.0423
+PxD             -0.0505     0.0177    -2.8449     0.0044     -0.0852     -0.0157
+popestimate   -9.98e-08  1.695e-08    -5.8896     0.0000   -1.33e-07  -6.659e-08
+employment    1.769e-07  2.226e-08     7.9470     0.0000   1.333e-07   2.206e-07
+aveFareTotal    -0.0012     0.0005    -2.5437     0.0110     -0.0021     -0.0003
+VRHTotal      8.564e-07  1.693e-07     5.0596     0.0000   5.247e-07   1.188e-06
+VOMSTotal        0.0005   2.27e-05     20.119     0.0000      0.0004      0.0005
+VRMTotal     -2.596e-08   7.54e-09    -3.4424     0.0006  -4.074e-08  -1.118e-08
+gasPrice        -0.0096     0.0167    -0.5764     0.5643     -0.0423      0.0231
+================================================================================
+
+F-test for Poolability: 2032.5
+P-value: 0.0000
+Distribution: F(818,70940)
+
+Included effects: Entity, Time
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e4968ecf">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=caecd454">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7644,8 +7991,90 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b7c9d433">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=95e9f0a1">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create the design matrices</span>
+<span class="n">X2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">FxD</span><span class="p">,</span> <span class="n">W</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Fit the Panel OLS models with individual and time fixed effects</span>
+<span class="n">model4</span> <span class="o">=</span> <span class="n">PanelOLS</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X2</span><span class="p">,</span> <span class="n">entity_effects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">time_effects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_absorbed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">result4</span> <span class="o">=</span> <span class="n">model4</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result4</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>                          PanelOLS Estimation Summary                           
+================================================================================
+Dep. Variable:               UPTTotal   R-squared:                        0.0102
+Estimator:                   PanelOLS   R-squared (Between):             -0.0011
+No. Observations:               71768   R-squared (Within):              -0.0011
+Date:                Fri, Jun 07 2024   R-squared (Overall):              0.0029
+Time:                        20:17:26   Log-likelihood                -1.952e+04
+Cov. Estimator:            Unadjusted                                           
+                                        F-statistic:                      81.376
+Entities:                         676   P-value                           0.0000
+Avg Obs:                       106.17   Distribution:                 F(9,70940)
+Min Obs:                       6.0000                                           
+Max Obs:                       144.00   F-statistic (robust):             81.376
+                                        P-value                           0.0000
+Time periods:                     144   Distribution:                 F(9,70940)
+Avg Obs:                       498.39                                           
+Min Obs:                       161.00                                           
+Max Obs:                       586.00                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+treatUberX      -0.0309     0.0089    -3.4692     0.0005     -0.0484     -0.0135
+FxD             -0.0124     0.0089    -1.3940     0.1633     -0.0299      0.0050
+popestimate  -1.038e-07  1.687e-08    -6.1525     0.0000  -1.369e-07  -7.074e-08
+employment    1.737e-07  2.223e-08     7.8136     0.0000   1.301e-07   2.173e-07
+aveFareTotal    -0.0012     0.0005    -2.5702     0.0102     -0.0021     -0.0003
+VRHTotal      8.576e-07  1.693e-07     5.0665     0.0000   5.259e-07   1.189e-06
+VOMSTotal        0.0005  2.273e-05     20.160     0.0000      0.0004      0.0005
+VRMTotal     -2.602e-08  7.541e-09    -3.4505     0.0006   -4.08e-08  -1.124e-08
+gasPrice        -0.0101     0.0167    -0.6082     0.5431     -0.0428      0.0226
+================================================================================
+
+F-test for Poolability: 1901.9
+P-value: 0.0000
+Distribution: F(818,70940)
+
+Included effects: Entity, Time
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a17952a8">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a5d3685e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7662,8 +8091,106 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f3684183">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b587dae0">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load data</span>
+<span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Define the dependent variable and independent variables</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">])</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]]</span>
+<span class="n">PxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'PxD'</span><span class="p">]</span>
+<span class="n">FxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'FxD'</span><span class="p">]</span>
+
+<span class="c1"># Scale the independent variables with log transformation</span>
+<span class="n">W_scaled_df</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+
+<span class="c1"># Create the design matrices</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Encode entity and time as dummy variables</span>
+<span class="n">entity_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'agency_city'</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">time_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'dateSurvey'</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create the design matrices</span>
+<span class="n">X3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">PxD</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">,</span> <span class="n">entity_dummies</span><span class="p">,</span> <span class="n">time_dummies</span><span class="p">))</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=22b532c8">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Fit Lasso regression models</span>
+<span class="n">alpha1</span> <span class="o">=</span> <span class="n">BCCH</span><span class="p">(</span><span class="n">X3</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="n">lasso1</span> <span class="o">=</span> <span class="n">Lasso</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha1</span><span class="p">)</span>  <span class="c1"># You can adjust the alpha parameter as needed</span>
+<span class="n">lasso1</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X3</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+<span class="c1"># Define the feature names</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'D'</span><span class="p">,</span> <span class="s1">'P'</span><span class="p">,</span> <span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]</span>
+
+<span class="c1"># Create DataFrame for Model 1</span>
+<span class="n">coef1_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">'Feature'</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span>
+    <span class="s1">'Coefficient'</span><span class="p">:</span> <span class="n">lasso1</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Model 1 Coefficients:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">coef1_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Model 1 Coefficients:
+        Feature  Coefficient
+0             D     0.000000
+1             P     0.000000
+2   popestimate     0.000000
+3    employment     0.009711
+4  aveFareTotal    -0.000000
+5      VRHTotal     1.170157
+6     VOMSTotal     0.000000
+7      VRMTotal     0.000000
+8      gasPrice     0.000000
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4c95a012">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a2450676">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7680,8 +8207,73 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ef464b0b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c0dc614a">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create the design matrices</span>
+<span class="n">X4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">FxD</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">,</span> <span class="n">entity_dummies</span><span class="p">,</span> <span class="n">time_dummies</span><span class="p">))</span>
+
+<span class="c1"># Fit Lasso regression models</span>
+<span class="n">alpha2</span> <span class="o">=</span> <span class="n">BCCH</span><span class="p">(</span><span class="n">X4</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="n">lasso2</span> <span class="o">=</span> <span class="n">Lasso</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha1</span><span class="p">)</span>  <span class="c1"># You can adjust the alpha parameter as needed</span>
+<span class="n">lasso2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X4</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+<span class="c1"># Define the feature names</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'D'</span><span class="p">,</span> <span class="s1">'F'</span><span class="p">,</span> <span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]</span>
+
+<span class="c1"># Create DataFrame for Model 1</span>
+<span class="n">coef2_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">'Feature'</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span>
+    <span class="s1">'Coefficient'</span><span class="p">:</span> <span class="n">lasso2</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Model 2 Coefficients:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">coef2_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Model 2 Coefficients:
+        Feature  Coefficient
+0             D     0.000000
+1             F     0.000000
+2   popestimate     0.000000
+3    employment     0.009711
+4  aveFareTotal    -0.000000
+5      VRHTotal     1.170157
+6     VOMSTotal     0.000000
+7      VRMTotal     0.000000
+8      gasPrice     0.000000
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b4bc6dd">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=68ea8d47">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7698,8 +8290,105 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=864f62e1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e13ba6d4">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">]),</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]]))</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'P'</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="o">*</span><span class="n">P</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+<span class="n">W2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+<span class="n">DP</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">P</span>
+
+<span class="c1"># Convert dummy variables to numpy arrays</span>
+<span class="n">entity_dummies_array</span> <span class="o">=</span> <span class="n">entity_dummies</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">time_dummies_array</span> <span class="o">=</span> <span class="n">time_dummies</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+<span class="c1"># Concatenate the arrays</span>
+<span class="n">W1_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W1</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">W2_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W2</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="c1"># Run double LASSO regression to estimate alpha for D</span>
+<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W1_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated alpha: 0.1249
+Estimated standard error: 0.0335
+Confidence interval: (0.0592, 0.1906)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=83b55bc9">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Run double LASSO regression to estimate alpha for D*P</span>
+<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DP</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated alpha: -0.0963
+Estimated standard error: 0.0375
+Confidence interval: (-0.1698, -0.0229)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=371f1a24">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=34b05a50">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7716,8 +8405,93 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=95dd1147">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b5b7e46c">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'F'</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="o">*</span><span class="n">F</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+<span class="n">W3_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W3</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">DF</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">F</span>
+
+<span class="c1"># Run double LASSO regression to estimate alpha for D, using F as an instrument</span>
+<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W3_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated alpha: -0.2374
+Estimated standard error: 0.0188
+Confidence interval: (-0.2743, -0.2006)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=76d32b50">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Run double LASSO regression to estimate alpha for D*F</span>
+<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DF</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated alpha: 0.5964
+Estimated standard error: 0.0224
+Confidence interval: (0.5525, 0.6403)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7c6329db">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2daa66aa">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7734,8 +8508,32 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=95d56d47">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2eed2658">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b91fd5c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=87298ce7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7752,8 +8550,32 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c614b499">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7108e0af">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c8516488">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c624c9fb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7770,8 +8592,32 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=39ee1af7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fa00b457">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f061c0ed">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b4ee64a2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7785,6 +8631,30 @@ a.anchor-link {
         Double-LASSO: log \(Y_{it} = \eta_i + \delta_t + D_{it} \beta_1 + D_{it} Fit \beta_2 + \tilde{W}_{it}' \gamma + \epsilon_{it}\), where coefficients of interest are \(\beta_1\) and \(\beta_2\) and \(\tilde{W}_{it}\) includes all interactions of order 5 of variables in the vector \(W_{it}\).
     </div>
 </div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1b039d5b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dba95bff">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 </div>
 </div>
 </div>

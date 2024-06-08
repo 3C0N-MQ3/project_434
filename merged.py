@@ -81,32 +81,28 @@ data = data.dropna()
 # If treatUberX is greater than 0.5, set it to 1, if not, set it to 0
 data['treatUberX'] = (data['treatUberX'] > 0.5).astype(int)
 
-# Calculate the median population across all entities
-median_population = data.groupby('dateSurvey')['popestimate'].median()
+# Create interaction between agency and city
+data['agency_city'] = data['agency'] + data['city']
 
-# Merge the median population back to the original dataframe
-data = data.reset_index().merge(median_population.rename('median_pop'), on='dateSurvey')
+# Calculate the median population 
+data_copy = data[['UPTTotal', 'popestimate', 'city']].copy()
+p = data_copy.groupby(['city']).median()
+median_population = p['popestimate'].median()
 
 # Create the dummy variable P_{it}
-data['P'] = (data['popestimate'] > data['median_pop']).astype(int)
+data['P'] = (data['popestimate'] > median_population).astype(int)
 
-# Calculate the median rides across all times
-median_rides = data.groupby('dateSurvey')['UPTTotal'].median()
-
-# Merge the median population back to the original dataframe
-data = data.reset_index().merge(median_rides.rename('median_ride'), on='dateSurvey')
+# Calculate the median rides 
+median_rides = p['UPTTotal'].median()
 
 # Create the dummy variable F_{it}
-data['F'] = (data['UPTTotal'] > data['median_ride']).astype(int)
+data['F'] = (data['UPTTotal'] > median_rides).astype(int)
 
 # Create the interaction term P_{it} * D_{it}
 data['PxD'] = data['P'] * data['treatUberX']
 
 # Create the interaction term F_{it} * D_{it}
 data['FxD'] = data['F'] * data['treatUberX']
-
-# Create interaction between agency and city
-data['agency_city'] = data['agency'] + data['city']
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -138,12 +134,15 @@ X = pd.concat([D, W_scaled_df], axis=1)
 
 # Add constant to the models
 X = sm.add_constant(X)
+
 # %%
 # Fit the OLS model
 model1 = sm.OLS(Y, X).fit()
 
 # Print the results
 print(model1.summary())
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -154,7 +153,20 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+# Ensure Y is a Series rather than a DataFrame
+Y = Y.squeeze()
 
+# Create the design matrices
+X = pd.concat([D, W_scaled_df], axis=1)
+
+# Fit the Panel OLS models with individual and time fixed effects
+model2 = PanelOLS(Y, X, entity_effects=True, time_effects=True, drop_absorbed=True)
+result2 = model2.fit()
+
+# Print the summaries to check the fixed effects inclusion
+print(result2.summary)
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -165,7 +177,16 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+# Create the design matrices
+X1 = pd.concat([D, PxD, W], axis=1)
 
+# Fit the Panel OLS models with individual and time fixed effects
+model3 = PanelOLS(Y, X1, entity_effects=True, time_effects=True, drop_absorbed=True)
+result3 = model3.fit()
+
+print(result3.summary)
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -176,7 +197,16 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+# Create the design matrices
+X2 = pd.concat([D, FxD, W], axis=1)
 
+# Fit the Panel OLS models with individual and time fixed effects
+model4 = PanelOLS(Y, X2, entity_effects=True, time_effects=True, drop_absorbed=True)
+result4 = model4.fit()
+
+print(result4.summary)
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -187,7 +217,49 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+# Load data
+data.reset_index(inplace=True)
 
+# Define the dependent variable and independent variables
+Y = np.log(data['UPTTotal'])
+D = data['treatUberX']
+W = data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]
+PxD = data['PxD']
+FxD = data['FxD']
+
+# Scale the independent variables with log transformation
+W_scaled_df = np.log(W)
+
+# Create the design matrices
+X = pd.concat([D, W_scaled_df], axis=1)
+
+# Encode entity and time as dummy variables
+entity_dummies = pd.get_dummies(data['agency_city'], drop_first=True)
+time_dummies = pd.get_dummies(data['dateSurvey'], drop_first=True)
+
+# Create the design matrices
+X3 = np.column_stack((D, PxD, W_scaled_df, entity_dummies, time_dummies))
+Y = np.log(data['UPTTotal'])
+
+# %%
+# Fit Lasso regression models
+alpha1 = BCCH(X3, Y)
+lasso1 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
+lasso1.fit(X3, Y)
+
+# Define the feature names
+feature_names = ['D', 'P', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+
+# Create DataFrame for Model 1
+coef1_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': lasso1.coef_[:9]
+})
+
+print("Model 1 Coefficients:")
+print(coef1_df)
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -198,7 +270,27 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+# Create the design matrices
+X4 = np.column_stack((D, FxD, W_scaled_df, entity_dummies, time_dummies))
 
+# Fit Lasso regression models
+alpha2 = BCCH(X4, Y)
+lasso2 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
+lasso2.fit(X4, Y)
+
+# Define the feature names
+feature_names = ['D', 'F', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+
+# Create DataFrame for Model 1
+coef2_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': lasso2.coef_[:9]
+})
+
+print("Model 2 Coefficients:")
+print(coef2_df)
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -209,7 +301,40 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+Y = np.array(np.log(data['UPTTotal']), ndmin=1).T
+D = np.array(data['treatUberX'], ndmin=1).T
+W = np.array(np.log(data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]))
+P = np.array(data['P'], ndmin=1).T
+W1 = np.column_stack((D*P, W))
+W2 = np.column_stack((D, W))
+DP = D * P
 
+# Convert dummy variables to numpy arrays
+entity_dummies_array = entity_dummies.to_numpy()
+time_dummies_array = time_dummies.to_numpy()
+
+# Concatenate the arrays
+W1_combined = np.concatenate([W1, entity_dummies_array, time_dummies_array], axis=1)
+W2_combined = np.concatenate([W2, entity_dummies_array, time_dummies_array], axis=1)
+
+
+# Run double LASSO regression to estimate alpha for D
+estimated_alpha, estimated_std_error = double_lasso(Y, D, W1_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+# %%
+# Run double LASSO regression to estimate alpha for D*P
+estimated_alpha, estimated_std_error = double_lasso(Y, DP, W2_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -220,7 +345,29 @@ print(model1.summary())
 #     </div>
 # </div>
 # %%
+F = np.array(data['F'], ndmin=1).T
+W3 = np.column_stack((D*F, W))
+W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axis=1)
+DF = D * F
 
+# Run double LASSO regression to estimate alpha for D, using F as an instrument
+estimated_alpha, estimated_std_error = double_lasso(Y, D, W3_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %%
+# Run double LASSO regression to estimate alpha for D*F
+estimated_alpha, estimated_std_error = double_lasso(Y, DF, W2_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -233,6 +380,8 @@ print(model1.summary())
 # %%
 
 # %% [markdown]
+#
+# %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
 #         10.)
@@ -243,6 +392,8 @@ print(model1.summary())
 # </div>
 # %%
 
+# %% [markdown]
+#
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -255,6 +406,8 @@ print(model1.summary())
 # %%
 
 # %% [markdown]
+#
+# %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
 #         12.)
@@ -265,3 +418,5 @@ print(model1.summary())
 # </div>
 # %%
 
+# %% [markdown]
+#
