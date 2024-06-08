@@ -7,6 +7,7 @@ from scipy.stats import norm
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures
 from linearmodels.panel import PanelOLS
 
 from src.BCCH import BCCH
