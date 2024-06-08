@@ -25,29 +25,25 @@ data = data.dropna()
 # If treatUberX is greater than 0.5, set it to 1, if not, set it to 0
 data['treatUberX'] = (data['treatUberX'] > 0.5).astype(int)
 
-# Calculate the median population across all entities
-median_population = data.groupby('dateSurvey')['popestimate'].median()
+# Create interaction between agency and city
+data['agency_city'] = data['agency'] + data['city']
 
-# Merge the median population back to the original dataframe
-data = data.reset_index().merge(median_population.rename('median_pop'), on='dateSurvey')
+# Calculate the median population 
+data_copy = data[['UPTTotal', 'popestimate', 'city']].copy()
+p = data_copy.groupby(['city']).median()
+median_population = p['popestimate'].median()
 
 # Create the dummy variable P_{it}
-data['P'] = (data['popestimate'] > data['median_pop']).astype(int)
+data['P'] = (data['popestimate'] > median_population).astype(int)
 
-# Calculate the median rides across all times
-median_rides = data.groupby('dateSurvey')['UPTTotal'].median()
-
-# Merge the median population back to the original dataframe
-data = data.reset_index().merge(median_rides.rename('median_ride'), on='dateSurvey')
+# Calculate the median rides 
+median_rides = p['UPTTotal'].median()
 
 # Create the dummy variable F_{it}
-data['F'] = (data['UPTTotal'] > data['median_ride']).astype(int)
+data['F'] = (data['UPTTotal'] > median_rides).astype(int)
 
 # Create the interaction term P_{it} * D_{it}
 data['PxD'] = data['P'] * data['treatUberX']
 
 # Create the interaction term F_{it} * D_{it}
 data['FxD'] = data['F'] * data['treatUberX']
-
-# Create interaction between agency and city
-data['agency_city'] = data['agency'] + data['city']

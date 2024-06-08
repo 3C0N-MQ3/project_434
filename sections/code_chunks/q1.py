@@ -19,6 +19,7 @@ X = pd.concat([D, W_scaled_df], axis=1)
 
 # Add constant to the models
 X = sm.add_constant(X)
+
 # %%
 # Fit the OLS model
 model1 = sm.OLS(Y, X).fit()
