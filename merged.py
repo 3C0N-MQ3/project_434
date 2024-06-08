@@ -63,6 +63,7 @@ from scipy.stats import norm
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures
 from linearmodels.panel import PanelOLS
 
 from src.BCCH import BCCH
@@ -353,19 +354,19 @@ W2_combined = np.concatenate([W2, entity_dummies_array, time_dummies_array], axi
 
 
 # Run double LASSO regression to estimate alpha for D
-estimated_alpha, estimated_std_error = double_lasso(Y, D, W1_combined)
-print("Estimated alpha:", estimated_alpha.round(4))
+estimated_beta_1, estimated_std_error = double_lasso(Y, D, W1_combined)
+print("Estimated beta_1:", estimated_beta_1.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
-min = estimated_alpha - 1.96 * estimated_std_error
-max = estimated_alpha + 1.96 * estimated_std_error
+min = estimated_beta_1 - 1.96 * estimated_std_error
+max = estimated_beta_1 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
 # %%
 # Run double LASSO regression to estimate alpha for D*P
-estimated_alpha, estimated_std_error = double_lasso(Y, DP, W2_combined)
-print("Estimated alpha:", estimated_alpha.round(4))
+estimated_beta_2, estimated_std_error = double_lasso(Y, DP, W2_combined)
+print("Estimated beta_2:", estimated_beta_2.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
-min = estimated_alpha - 1.96 * estimated_std_error
-max = estimated_alpha + 1.96 * estimated_std_error
+min = estimated_beta_2 - 1.96 * estimated_std_error
+max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
 # %% [markdown]
 #
@@ -385,20 +386,20 @@ W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axi
 DF = D * F
 
 # Run double LASSO regression to estimate alpha for D, using F as an instrument
-estimated_alpha, estimated_std_error = double_lasso(Y, D, W3_combined)
-print("Estimated alpha:", estimated_alpha.round(4))
+estimated_beta_1, estimated_std_error = double_lasso(Y, D, W3_combined)
+print("Estimated beta_1:", estimated_beta_1.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
-min = estimated_alpha - 1.96 * estimated_std_error
-max = estimated_alpha + 1.96 * estimated_std_error
+min = estimated_beta_1 - 1.96 * estimated_std_error
+max = estimated_beta_1 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
 
 # %%
 # Run double LASSO regression to estimate alpha for D*F
-estimated_alpha, estimated_std_error = double_lasso(Y, DF, W2_combined)
-print("Estimated alpha:", estimated_alpha.round(4))
+estimated_beta_2, estimated_std_error = double_lasso(Y, DF, W2_combined)
+print("Estimated beta_2:", estimated_beta_2.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
-min = estimated_alpha - 1.96 * estimated_std_error
-max = estimated_alpha + 1.96 * estimated_std_error
+min = estimated_beta_2 - 1.96 * estimated_std_error
+max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
 # %% [markdown]
 #
@@ -426,6 +427,32 @@ r"""
 #     </div>
 # </div>
 # %%
+# Create polynomial features of 5th order
+poly = PolynomialFeatures(degree=5)
+W_poly = poly.fit_transform(W_scaled_df)
+W_p = pd.DataFrame(W_poly)
+W_p.drop(columns= 0, inplace=True)
+
+# %%
+# Create the design matrices
+X9 = np.column_stack((D, PxD, W_p, entity_dummies, time_dummies))
+
+# Fit Lasso regression models
+alpha3 = BCCH(X9, Y)
+lasso9 = Lasso(alpha=alpha3)  # You can adjust the alpha parameter as needed
+lasso9.fit(X9, Y)
+
+# Define the feature names
+feature_names = ['D', 'PD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+
+# Create DataFrame for Model 9
+coef9_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': lasso9.coef_[:9]
+})
+
+print("Model 9 Coefficients:")
+print(coef9_df)
 
 # %% [markdown]
 #
@@ -439,7 +466,25 @@ r"""
 #     </div>
 # </div>
 # %%
+# Create the design matrices
+X10 = np.column_stack((D, FxD, W_p, entity_dummies, time_dummies))
 
+# Fit Lasso regression models
+alpha4 = BCCH(X10, Y)
+lasso10 = Lasso(alpha=alpha4)  # You can adjust the alpha parameter as needed
+lasso10.fit(X10, Y)
+
+# Define the feature names
+feature_names = ['D', 'FD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+
+# Create DataFrame for Model 10
+coef10_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': lasso10.coef_[:9]
+})
+
+print("Model 10 Coefficients:")
+print(coef10_df)
 # %% [markdown]
 #
 # %% [markdown]
@@ -467,7 +512,39 @@ r"""
 #     </div>
 # </div>
 # %%
+Y = np.array(np.log(data['UPTTotal']), ndmin=1).T
+D = np.array(data['treatUberX'], ndmin=1).T
+W = np.array(np.log(data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]))
+P = np.array(data['P'], ndmin=1).T
+W1 = np.column_stack((D*P, W_p))
+W2 = np.column_stack((D, W_p))
+DP = D * P
 
+# Convert dummy variables to numpy arrays
+entity_dummies_array = entity_dummies.to_numpy()
+time_dummies_array = time_dummies.to_numpy()
+
+# Concatenate the arrays
+W1_combined = np.concatenate([W1, entity_dummies_array, time_dummies_array], axis=1)
+W2_combined = np.concatenate([W2, entity_dummies_array, time_dummies_array], axis=1)
+
+
+# Run double LASSO regression to estimate alpha for D
+estimated_beta_1, estimated_std_error = double_lasso(Y, D, W1_combined)
+print("Estimated beta_1:", estimated_beta_1.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_beta_1 - 1.96 * estimated_std_error
+max = estimated_beta_1 + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %%
+# Run double LASSO regression to estimate alpha for D*P
+estimated_beta_2, estimated_std_error = double_lasso(Y, DP, W2_combined)
+print("Estimated beta_2:", estimated_beta_2.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_beta_2 - 1.96 * estimated_std_error
+max = estimated_beta_2 + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
 # %% [markdown]
 #
 # %% [markdown]
@@ -480,6 +557,35 @@ r"""
 #     </div>
 # </div>
 # %%
+
+# Create Fit
+F = np.array(data['F'], ndmin=1).T
+W3 = np.column_stack((D*F, W_p))
+DF = D * F
+
+# Convert dummy variables to numpy arrays
+entity_dummies_array = entity_dummies.to_numpy()
+time_dummies_array = time_dummies.to_numpy()
+
+# Concatenate the arrays
+W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axis=1)
+
+# Run double LASSO regression to estimate alpha for D
+estimated_beta_1, estimated_std_error = double_lasso(Y, D, W3_combined)
+print("Estimated beta_1:", estimated_beta_1.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_beta_1 - 1.96 * estimated_std_error
+max = estimated_beta_1 + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %%
+# Run double LASSO regression to estimate alpha for D*F
+estimated_beta_2, estimated_std_error = double_lasso(Y, DF, W2_combined)
+print("Estimated beta_2:", estimated_beta_2.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_beta_2 - 1.96 * estimated_std_error
+max = estimated_beta_2 + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
 
 # %% [markdown]
 #
