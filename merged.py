@@ -188,7 +188,7 @@ result3 = model3.fit()
 
 print(result3.summary)
 # %% [markdown]
-# We expand our analysis to examine how the effect of Uber differs based on the population of the MSA. We add $$P_{it}$$, a dummy variable that takes a value of 1 if the population is larger than the median population in the dataset and 0 otherwise. Using this model, we estimate a 0.75% increase in ridership, which is not statistically significant. Higher average fares negatively affect ridership, while more vehicle hours and miles seem to slightly increase ridership. The results also suggest that more vehicles in service significantly increase ridership, while more vehicle miles slightly decrease it. Again, gas prices do not have a significant effect in this model. Overall, we observe that the majority of the coefficients are very close to 0, with confidence intervals indicating that they could have either a positive or negative overall effect on ridership.
+# We expand our analysis to examine how the effect of Uber differs based on the population of the MSA. We add $P_{it}$, a dummy variable that takes a value of 1 if the population is larger than the median population in the dataset and 0 otherwise. Using this model, we estimate a 0.75% increase in ridership, which is not statistically significant. Higher average fares negatively affect ridership, while more vehicle hours and miles seem to slightly increase ridership. The results also suggest that more vehicles in service significantly increase ridership, while more vehicle miles slightly decrease it. Again, gas prices do not have a significant effect in this model. Overall, we observe that the majority of the coefficients are very close to 0, with confidence intervals indicating that they could have either a positive or negative overall effect on ridership.
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -208,22 +208,23 @@ result4 = model4.fit()
 
 print(result4.summary)
 # %% [markdown]
-# Instead of examining how the effect of Uber differs based on the population, we now account for heterogeneity based on the number of riders using public transit before Uber arrived. We add $$F_{it}$$, a dummy variable that takes a value of 1 if the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies in the dataset. Using this model, we estimate a 3.09% decrease in ridership, suggesting that Uber substitutes public transit. Apart from that important difference, the rest of the control variables are similar in both magnitude and sign to those observed in regression 3.
+# Instead of examining how the effect of Uber differs based on the population, we now account for heterogeneity based on the number of riders using public transit before Uber arrived. We add $F_{it}$, a dummy variable that takes a value of 1 if the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies in the dataset. Using this model, we estimate a 3.09% decrease in ridership, suggesting that Uber substitutes public transit. Apart from that important difference, the rest of the control variables are similar in both magnitude and sign to those observed in regression 3.
 # %% [markdown]
-# | Variable         | OLS 1 | OLS 2 | OLS 3 | OLS 4 |
-# |------------------|------------------|------------------------|------------------------|------------------------|
-# | Intercept        | -0.7976          | N/A                    | N/A                    | N/A                    |
-# | treatUberX       | 0.0382           | -0.0354                | 0.0075                 | -0.0309                |
-# | popestimate      | -0.9271          | 0.2789                 | -9.98e-08              | -1.038e-07             |
-# | employment       | 0.9909           | 0.2677                 | 1.769e-07              | 1.737e-07              |
-# | aveFareTotal     | -0.1277          | -0.0996                | -0.0012                | -0.0012                |
-# | VRHTotal         | 1.3417           | 0.3052                 | 8.564e-07              | 8.576e-07              |
-# | VOMSTotal        | -0.2376          | 0.2314                 | 0.0005                 | 0.0005                 |
-# | VRMTotal         | 0.0688           | 0.2664                 | -2.596e-08             | -2.602e-08             |
-# | gasPrice         | 0.2136           | -0.0407                | -0.0096                | -0.0101                |
-#
-#
-# Overall, the OLS models indicate that we cannot definitively determine whether the effect of Uber on public transit was complementary or supplementary. The results are not robust across regressions, and therefore, we cannot establish causality. This inconsistency suggests that further analysis with more rigorous methods is needed to understand the true impact of Uber on public transit ridership. Below, we try to address these problems using LASSO and double LASSO regression techniques.
+"""
+| Variable     | $OLS_1$ | $OLS_2$ | $OLS_3$    | $OLS_4$    |
+| ------------ | ------- | ------- | ---------- | ---------- |
+| Intercept    | -0.7976 | N/A     | N/A        | N/A        |
+| treatUberX   | 0.0382  | -0.0354 | 0.0075     | -0.0309    |
+| popestimate  | -0.9271 | 0.2789  | -9.98e-08  | -1.038e-07 |
+| employment   | 0.9909  | 0.2677  | 1.769e-07  | 1.737e-07  |
+| aveFareTotal | -0.1277 | -0.0996 | -0.0012    | -0.0012    |
+| VRHTotal     | 1.3417  | 0.3052  | 8.564e-07  | 8.576e-07  |
+| VOMSTotal    | -0.2376 | 0.2314  | 0.0005     | 0.0005     |
+| VRMTotal     | 0.0688  | 0.2664  | -2.596e-08 | -2.602e-08 |
+| gasPrice     | 0.2136  | -0.0407 | -0.0096    | -0.0101    |
+
+Overall, the OLS models indicate that we cannot definitively determine whether the effect of Uber on public transit was complementary or supplementary. The results are not robust across regressions, and therefore, we cannot establish causality. This inconsistency suggests that further analysis with more rigorous methods is needed to understand the true impact of Uber on public transit ridership. Below, we try to address these problems using LASSO and double LASSO regression techniques.
+"""
 
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
@@ -310,6 +311,21 @@ print(coef2_df)
 # %% [markdown]
 #
 # %% [markdown]
+"""
+| Variable     | $LASSO_5$ | $LASSO_6$ |
+| ------------ | --------- | --------- |
+| D            | 0         | 0         |
+| DP           | 0         | N/A       |
+| DF           | N/A       | 0         |
+| popestimate  | 0         | 0         |
+| employment   | 0.009711  | 0.009711  |
+| aveFareTotal | 0         | 0         |
+| VRHTotal     | 1.170157  | 1.170157  |
+| VOMSTotal    | 0         | 0         |
+| VRMTotal     | 0         | 0         |
+| gasPrice     | 0         | 0         |
+"""
+# %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
 #         7.)
@@ -387,6 +403,20 @@ print("Confidence interval:", (min.round(4), max.round(4)))
 # %% [markdown]
 #
 # %% [markdown]
+r"""
+| Variable | $Double\,Lasso_7$ | $Double\,Lasso_8$ |
+| -------- | ----------------- | ----------------- |
+| D        | 0.1249            | -0.2374           |
+| D lower  | 0.0592            | -0.2743           |
+| D upper  | 0.1906            | -0.2006           |
+| PD       | -0.0963           | N/A               |
+| PD lower | -0.1698           | N/A               |
+| PD upper | -0.0229           | N/A               |
+| DF       | N/A               | 0.5964            |
+| DF lower | N/A               | 0.5525            |
+| DF upper | N/A               | 0.6403            |
+"""
+# %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
 #         9.)
@@ -413,6 +443,21 @@ print("Confidence interval:", (min.round(4), max.round(4)))
 # %% [markdown]
 #
 # %% [markdown]
+"""
+| Variable     | $LASSO_5$ | $LASSO_6$ | $LASSO_9$ | $LASSO_{10}$ |
+| ------------ | --------- | --------- | --------- | ------------ |
+| D            | 0         | 0         | 0         | 0            |
+| DP           | 0         | N/A       | 0         | 0            |
+| DF           | N/A       | 0         | 0         | 0            |
+| popestimate  | 0         | 0         | 0         | 0            |
+| employment   | 0.009711  | 0.009711  | 0         | 0            |
+| aveFareTotal | 0         | 0         | 0         | 0            |
+| VRHTotal     | 1.170157  | 1.170157  | 0         | 0            |
+| VOMSTotal    | 0         | 0         | 0         | 0            |
+| VRMTotal     | 0         | 0         | 0         | 0            |
+| gasPrice     | 0         | 0         | 0         | 0            |
+"""
+# %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
 #         11.)
@@ -438,3 +483,17 @@ print("Confidence interval:", (min.round(4), max.round(4)))
 
 # %% [markdown]
 #
+# %% [markdown]
+r"""
+| Variable | $Double\,Lasso_7$ | $Double\,Lasso_8$ | $Double\,Lasso_{11}$ | $Double\,Lasso_{12}$ |
+| -------- | ----------------- | ----------------- | -------------------- | -------------------- |
+| D        | 0.1249            | -0.2374           | 0.0254               | 0.0254               |
+| D lower  | 0.0592            | -0.2743           | -0.0015              | -0.0015              |
+| D upper  | 0.1906            | -0.2006           | 0.0523               | 0.0523               |
+| PD       | -0.0963           | N/A               | -0.0092              | N/A                  |
+| PD lower | -0.1698           | N/A               | -0.0371              | N/A                  |
+| PD upper | -0.0229           | N/A               | 0.0187               | N/A                  |
+| DF       | N/A               | 0.5964            | N/A                  | 0.5033               |
+| DF lower | N/A               | 0.5525            | N/A                  | 0.4725               |
+| DF upper | N/A               | 0.6403            | N/A                  | 0.534                |
+"""
