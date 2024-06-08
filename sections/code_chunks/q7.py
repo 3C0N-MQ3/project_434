@@ -16,17 +16,17 @@ W2_combined = np.concatenate([W2, entity_dummies_array, time_dummies_array], axi
 
 
 # Run double LASSO regression to estimate alpha for D
-estimated_alpha, estimated_std_error = double_lasso(Y, D, W1_combined)
-print("Estimated alpha:", estimated_alpha.round(4))
+estimated_beta_1, estimated_std_error = double_lasso(Y, D, W1_combined)
+print("Estimated beta_1:", estimated_beta_1.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
-min = estimated_alpha - 1.96 * estimated_std_error
-max = estimated_alpha + 1.96 * estimated_std_error
+min = estimated_beta_1 - 1.96 * estimated_std_error
+max = estimated_beta_1 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
 # %%
 # Run double LASSO regression to estimate alpha for D*P
-estimated_alpha, estimated_std_error = double_lasso(Y, DP, W2_combined)
-print("Estimated alpha:", estimated_alpha.round(4))
+estimated_beta_2, estimated_std_error = double_lasso(Y, DP, W2_combined)
+print("Estimated beta_2:", estimated_beta_2.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
-min = estimated_alpha - 1.96 * estimated_std_error
-max = estimated_alpha + 1.96 * estimated_std_error
+min = estimated_beta_2 - 1.96 * estimated_std_error
+max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))

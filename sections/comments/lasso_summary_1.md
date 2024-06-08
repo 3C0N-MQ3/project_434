@@ -1,0 +1,12 @@
+| Variable     | $LASSO_5$ | $LASSO_6$ |
+| ------------ | --------- | --------- |
+| D            | 0         | 0         |
+| DP           | 0         | N/A       |
+| DF           | N/A       | 0         |
+| popestimate  | 0         | 0         |
+| employment   | 0.009711  | 0.009711  |
+| aveFareTotal | 0         | 0         |
+| VRHTotal     | 1.170157  | 1.170157  |
+| VOMSTotal    | 0         | 0         |
+| VRMTotal     | 0         | 0         |
+| gasPrice     | 0         | 0         |

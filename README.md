@@ -58,7 +58,18 @@ To be discussed...
     ```bash
     cd project_434
     ```
-3. Run the analysis scripts:
+
+3. Create the Conda environment from the `environment.yml` file:
+    ```bash
+    conda env create -f environment.yml
+    ```
+
+4. Activate the Conda environment:
+    ```bash
+    conda activate myenv
+    ```
+
+5. Run the analysis scripts:
     ```bash
     python merged.ipynb
     ```

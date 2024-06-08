@@ -194,7 +194,9 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from linearmodels.panel import PanelOLS
 import statsmodels.api as sm
+from sklearn.preprocessing import PolynomialFeatures
 
+# %%
 # Load data
 data = pd.read_csv("uber_dataset.csv", index_col=0)
 
@@ -252,14 +254,14 @@ FxD = data['FxD']
 W_scaled_df = np.log(W)
 
 # Create the design matrices
-X = pd.concat([D, W_scaled_df], axis=1)
+X1 = pd.concat([D, W_scaled_df], axis=1)
 
 # Add constant to the models
-X = sm.add_constant(X)
+X1 = sm.add_constant(X1)
 
 # %%
 # Fit the OLS model
-model1 = sm.OLS(Y, X).fit()
+model1 = sm.OLS(Y, X1).fit()
 
 # Print the results
 print(model1.summary())
@@ -272,10 +274,10 @@ print(model1.summary())
 Y = Y.squeeze()
 
 # Create the design matrices
-X = pd.concat([D, W_scaled_df], axis=1)
+X2 = pd.concat([D, W_scaled_df], axis=1)
 
 # Fit the Panel OLS models with individual and time fixed effects
-model2 = PanelOLS(Y, X, entity_effects=True, time_effects=True, drop_absorbed=True)
+model2 = PanelOLS(Y, X2, entity_effects=True, time_effects=True, drop_absorbed=True)
 result2 = model2.fit()
 
 # Print the summaries to check the fixed effects inclusion
@@ -286,10 +288,10 @@ print(result2.summary)
 
 # %%
 # Create the design matrices
-X1 = pd.concat([D, PxD, W], axis=1)
+X3 = pd.concat([D, PxD, W], axis=1)
 
 # Fit the Panel OLS models with individual and time fixed effects
-model3 = PanelOLS(Y, X1, entity_effects=True, time_effects=True, drop_absorbed=True)
+model3 = PanelOLS(Y, X3, entity_effects=True, time_effects=True, drop_absorbed=True)
 result3 = model3.fit()
 
 print(result3.summary)
@@ -299,10 +301,10 @@ print(result3.summary)
 
 # %%
 # Create the design matrices
-X2 = pd.concat([D, FxD, W], axis=1)
+X4 = pd.concat([D, FxD, W], axis=1)
 
 # Fit the Panel OLS models with individual and time fixed effects
-model4 = PanelOLS(Y, X2, entity_effects=True, time_effects=True, drop_absorbed=True)
+model4 = PanelOLS(Y, X4, entity_effects=True, time_effects=True, drop_absorbed=True)
 result4 = model4.fit()
 
 print(result4.summary)
@@ -324,58 +326,55 @@ FxD = data['FxD']
 # Scale the independent variables with log transformation
 W_scaled_df = np.log(W)
 
-# Create the design matrices
-X = pd.concat([D, W_scaled_df], axis=1)
-
 # Encode entity and time as dummy variables
 entity_dummies = pd.get_dummies(data['agency_city'], drop_first=True)
 time_dummies = pd.get_dummies(data['dateSurvey'], drop_first=True)
 
 # Create the design matrices
-X3 = np.column_stack((D, PxD, W_scaled_df, entity_dummies, time_dummies))
+X5 = np.column_stack((D, PxD, W_scaled_df, entity_dummies, time_dummies))
 Y = np.log(data['UPTTotal'])
 
 # %%
 # Fit Lasso regression models
-alpha1 = BCCH(X3, Y)
-lasso1 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
-lasso1.fit(X3, Y)
+alpha1 = BCCH(X5, Y)
+lasso5 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
+lasso5.fit(X5, Y)
 
 # Define the feature names
-feature_names = ['D', 'P', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+feature_names = ['D', 'PD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
 
 # Create DataFrame for Model 1
-coef1_df = pd.DataFrame({
+coef5_df = pd.DataFrame({
     'Feature': feature_names,
-    'Coefficient': lasso1.coef_[:9]
+    'Coefficient': lasso5.coef_[:9]
 })
 
-print("Model 1 Coefficients:")
-print(coef1_df)
+print("Model 5 Coefficients:")
+print(coef5_df)
 
 # %% [markdown]
 # 6. $LASSO: log Y_{it} = \eta_i + \delta_t + D_{it}\beta_{1} + D_{it}F_{it}\beta_{2} + W_{it}\gamma + e_{it}$; where $F_{it}$ is a dummy that takes value 1 if the number of rides of the public travel agency is larger than the median number of rides among all public transit agencies in the dataset.
 
 # %%
 # Create the design matrices
-X4 = np.column_stack((D, FxD, W_scaled_df, entity_dummies, time_dummies))
+X6 = np.column_stack((D, FxD, W_scaled_df, entity_dummies, time_dummies))
 
 # Fit Lasso regression models
-alpha2 = BCCH(X4, Y)
-lasso2 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
-lasso2.fit(X4, Y)
+alpha2 = BCCH(X6, Y)
+lasso6 = Lasso(alpha=alpha2)  # You can adjust the alpha parameter as needed
+lasso6.fit(X6, Y)
 
 # Define the feature names
-feature_names = ['D', 'F', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+feature_names = ['D', 'FD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
 
 # Create DataFrame for Model 1
-coef2_df = pd.DataFrame({
+coef6_df = pd.DataFrame({
     'Feature': feature_names,
-    'Coefficient': lasso2.coef_[:9]
+    'Coefficient': lasso6.coef_[:9]
 })
 
-print("Model 2 Coefficients:")
-print(coef2_df)
+print("Model 6 Coefficients:")
+print(coef6_df)
 
 
 # %% [markdown]
@@ -426,6 +425,132 @@ W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axi
 DF = D * F
 
 # Run double LASSO regression to estimate alpha for D, using F as an instrument
+estimated_alpha, estimated_std_error = double_lasso(Y, D, W3_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %%
+# Run double LASSO regression to estimate alpha for D*F
+estimated_alpha, estimated_std_error = double_lasso(Y, DF, W2_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %% [markdown]
+# 9. $LASSO: log Y_{it} = \eta_i + \delta_t + D_{it}\beta_{1} + D_{it}P_{it}\beta_{2} + \tilde{W}_{it} \gamma + e_{it}$, where where coefficients of interest are $\beta_1$ and $\beta_2$ $\tilde{W}_{it}$ includes all interactions of order 5 of variables in the vector $W_{it}.$
+
+# %%
+# Create polynomial features of 5th order
+poly = PolynomialFeatures(degree=5)
+W_poly = poly.fit_transform(W_scaled_df)
+W_p = pd.DataFrame(W_poly)
+W_p.drop(columns= 0, inplace=True)
+
+# %%
+# Create the design matrices
+X9 = np.column_stack((D, PxD, W_p, entity_dummies, time_dummies))
+
+# Fit Lasso regression models
+alpha3 = BCCH(X9, Y)
+lasso9 = Lasso(alpha=alpha3)  # You can adjust the alpha parameter as needed
+lasso9.fit(X9, Y)
+
+# Define the feature names
+feature_names = ['D', 'PD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+
+# Create DataFrame for Model 9
+coef9_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': lasso9.coef_[:9]
+})
+
+print("Model 9 Coefficients:")
+print(coef9_df)
+
+# %% [markdown]
+# 10. $LASSO: log Y_{it} = \eta_i + \delta_t + D_{it}\beta_{1} + D_{it}F_{it}\beta_{2} + \tilde{W}_{it} \gamma + e_{it}$, where where coefficients of interest are $\beta_1$ and $\beta_2$ $\tilde{W}_{it}$ includes all interactions of order 5 of variables in the vector $W_{it}.$
+
+# %%
+# Create the design matrices
+X10 = np.column_stack((D, FxD, W_p, entity_dummies, time_dummies))
+
+# Fit Lasso regression models
+alpha4 = BCCH(X10, Y)
+lasso10 = Lasso(alpha=alpha4)  # You can adjust the alpha parameter as needed
+lasso10.fit(X10, Y)
+
+# Define the feature names
+feature_names = ['D', 'FD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+
+# Create DataFrame for Model 10
+coef10_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': lasso10.coef_[:9]
+})
+
+print("Model 10 Coefficients:")
+print(coef10_df)
+
+# %% [markdown]
+# 11. $Double-LASSO: log Y_{it} = \eta_i + \delta_t + D_{it}\beta_{1} + D_{it}P_{it}\beta_{2} + \tilde{W}_{it}\gamma + e_{it}$; where where coefficients of interest are $\beta_1$ and $\beta_2$ $\tilde{W}_{it}$ includes all interactions of order 5 of variables in the vector $W_{it}.$
+
+# %%
+Y = np.array(np.log(data['UPTTotal']), ndmin=1).T
+D = np.array(data['treatUberX'], ndmin=1).T
+W = np.array(np.log(data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]))
+P = np.array(data['P'], ndmin=1).T
+W1 = np.column_stack((D*P, W_p))
+W2 = np.column_stack((D, W_p))
+DP = D * P
+
+# Convert dummy variables to numpy arrays
+entity_dummies_array = entity_dummies.to_numpy()
+time_dummies_array = time_dummies.to_numpy()
+
+# Concatenate the arrays
+W1_combined = np.concatenate([W1, entity_dummies_array, time_dummies_array], axis=1)
+W2_combined = np.concatenate([W2, entity_dummies_array, time_dummies_array], axis=1)
+
+
+# Run double LASSO regression to estimate alpha for D
+estimated_alpha, estimated_std_error = double_lasso(Y, D, W1_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %%
+# Run double LASSO regression to estimate alpha for D*P
+estimated_alpha, estimated_std_error = double_lasso(Y, DP, W2_combined)
+print("Estimated alpha:", estimated_alpha.round(4))
+print("Estimated standard error:", estimated_std_error.round(4))
+min = estimated_alpha - 1.96 * estimated_std_error
+max = estimated_alpha + 1.96 * estimated_std_error
+print("Confidence interval:", (min.round(4), max.round(4)))
+
+# %% [markdown]
+# 12. $Double-LASSO: log Y_{it} = \eta_i + \delta_t + D_{it}\beta_{1} + D_{it}F_{it}\beta_{2} + \tilde{W}_{it}\gamma + e_{it}$; where where coefficients of interest are $\beta_1$ and $\beta_2$ $\tilde{W}_{it}$ includes all interactions of order 5 of variables in the vector $W_{it}.$
+
+# %%
+# Create Fit
+F = np.array(data['F'], ndmin=1).T
+W3 = np.column_stack((D*F, W_p))
+DF = D * F
+
+# Convert dummy variables to numpy arrays
+entity_dummies_array = entity_dummies.to_numpy()
+time_dummies_array = time_dummies.to_numpy()
+
+# Concatenate the arrays
+W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axis=1)
+
+# Run double LASSO regression to estimate alpha for D
 estimated_alpha, estimated_std_error = double_lasso(Y, D, W3_combined)
 print("Estimated alpha:", estimated_alpha.round(4))
 print("Estimated standard error:", estimated_std_error.round(4))
