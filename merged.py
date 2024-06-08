@@ -23,7 +23,7 @@
 #         <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">
 #         <p><em>Luis-Alejandro Samayoa-Alvarado</em><br>
 #         <p><em>Mauricio Vargas-Estrada</em><br>
-#         <p><em>Nikolas Papadatos</em><br>
+#         <p><em>Nikolaos Papadatos</em><br>
 #         <p><em>William Borelli Ebert</em><br>
 #         <p>Master of Quantitative Economics<br>
 #         University of California - Los Angeles</p>
@@ -142,7 +142,9 @@ model1 = sm.OLS(Y, X).fit()
 # Print the results
 print(model1.summary())
 # %% [markdown]
-#
+"""
+This regression gives us an initial estimation of the effects of Uber presence on public transit ridership, showing a 3.82% increase in ridership, suggesting that Uber complements public transit. Higher population estimates are associated with a decrease in ridership, while higher employment levels are linked to a significant increase. Higher average fares negatively affect ridership, while more vehicle hours and miles significantly increase ridership. The results also suggest that more vehicles in service decrease ridership, and higher gas prices lead to a significant increase in ridership.
+"""
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -207,6 +209,21 @@ result4 = model4.fit()
 print(result4.summary)
 # %% [markdown]
 #
+# %% [markdown]
+"""
+| Variable         | OLS Coefficient | PanelOLS 1 Coefficient | PanelOLS 2 Coefficient | PanelOLS 3 Coefficient |
+|------------------|------------------|------------------------|------------------------|------------------------|
+| Intercept        | -0.7976          | N/A                    | N/A                    | N/A                    |
+| treatUberX       | 0.0382           | -0.0354                | 0.0075                 | -0.0309                |
+| popestimate      | -0.9271          | 0.2789                 | -9.98e-08              | -1.038e-07             |
+| employment       | 0.9909           | 0.2677                 | 1.769e-07              | 1.737e-07              |
+| aveFareTotal     | -0.1277          | -0.0996                | -0.0012                | -0.0012                |
+| VRHTotal         | 1.3417           | 0.3052                 | 8.564e-07              | 8.576e-07              |
+| VOMSTotal        | -0.2376          | 0.2314                 | 0.0005                 | 0.0005                 |
+| VRMTotal         | 0.0688           | 0.2664                 | -2.596e-08             | -2.602e-08             |
+| gasPrice         | 0.2136           | -0.0407                | -0.0096                | -0.0101                |
+"""
+
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
