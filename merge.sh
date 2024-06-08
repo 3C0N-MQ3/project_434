@@ -12,29 +12,46 @@ echo "Output file: $output_file"
 # Prepare an empty output file
 : > "$output_file"
 
+# Function to handle python tag replacement
+handle_python_tag() {
+  local file_path=$1
+  echo "✓ - Python file found: $file_path"
+  if [ -f "$file_path" ]; then
+    cat "$file_path" >> "$output_file"
+    echo "" >> "$output_file"  # Add a new line after the content
+  else
+    echo "x - Python file not found: $file_path"
+  fi
+}
+
 # Read the input file line by line
 while IFS= read -r line || [[ -n "$line" ]]; do
-  # Search for lines containing the indicator pattern
-  if [[ $line =~ \<\!--\*\!\{(.*)\}--\> ]]; then
-    # Extract the file path from the indicator
+  if [[ $line =~ \<py\!--\*\!\{(.*)\}--\> ]]; then
+    file_path="${BASH_REMATCH[1]}"
+    # Remove previous line if it contains """
+    if [[ $(tail -n 1 "$output_file") == '"""' ]]; then
+      sed -i '$d' "$output_file"
+    fi
+    handle_python_tag "$file_path"
+    # Skip the next line if it contains """
+    read -r next_line
+    if [[ $next_line != '"""' ]]; then
+      echo "$next_line" >> "$output_file"
+    fi
+  elif [[ $line =~ \<\!--\*\!\{(.*)\}--\> ]]; then
     file_path="${BASH_REMATCH[1]}"
     echo "✓ - File found: $file_path"
-    # Check if the specified file exists
     if [ -f "$file_path" ]; then
-      # Substitute the indicator line with the content of the specified file
-      # Directly appending the content to the output file
       cat "$file_path" >> "$output_file"
     else
       echo "x - File not found: $file_path"
     fi
   else
-    # For lines without indicators, simply add them to the output file
     echo "$line" >> "$output_file"
   fi
 done < "$input_file"
 
 # Generating the jupyter notebook from the merged file
-
 jupytext --set-formats py:percent,ipynb "$output_file"
 echo "✓ - Jupyter notebook generated"
 
