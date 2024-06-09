@@ -7535,7 +7535,7 @@ a.anchor-link {
 <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));"/>
 <p><em>Luis-Alejandro Samayoa-Alvarado</em><br/>
 <p><em>Mauricio Vargas-Estrada</em><br/>
-<p><em>Nikolas Papadatos</em><br/>
+<p><em>Nikolaos Papadatos</em><br/>
 <p><em>William Borelli Ebert</em><br/>
 <p>Master of Quantitative Economics<br/>
         University of California - Los Angeles</p>
@@ -7589,6 +7589,7 @@ a.anchor-link {
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Lasso</span>
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
 <span class="kn">from</span> <span class="nn">linearmodels.panel</span> <span class="kn">import</span> <span class="n">PanelOLS</span>
 
 <span class="kn">from</span> <span class="nn">src.BCCH</span> <span class="kn">import</span> <span class="n">BCCH</span>
@@ -7611,38 +7612,49 @@ a.anchor-link {
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"data/uber_dataset.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Drop treatGTNotStd variable</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">'treatGTNotStd'</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">"treatGTNotStd"</span><span class="p">)</span>
 
 <span class="c1"># Drop rows with missing values</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 
 <span class="c1"># If treatUberX is greater than 0.5, set it to 1, if not, set it to 0</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 <span class="c1"># Create interaction between agency and city</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'agency_city'</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'agency'</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">'city'</span><span class="p">]</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"agency_city"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"agency"</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s2">"city"</span><span class="p">]</span>
 
-<span class="c1"># Calculate the median population </span>
-<span class="n">data_copy</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">'UPTTotal'</span><span class="p">,</span> <span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'city'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">data_copy</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'city'</span><span class="p">])</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
-<span class="n">median_population</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">'popestimate'</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<span class="c1"># Calculate the median population</span>
+<span class="n">data_copy</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s2">"UPTTotal"</span><span class="p">,</span> <span class="s2">"popestimate"</span><span class="p">,</span> <span class="s2">"city"</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">data_copy</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"city"</span><span class="p">])</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<span class="n">median_population</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s2">"popestimate"</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 
 <span class="c1"># Create the dummy variable P_{it}</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'popestimate'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">median_population</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"P"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"popestimate"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">median_population</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
-<span class="c1"># Calculate the median rides </span>
-<span class="n">median_rides</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<span class="c1"># Calculate the median rides</span>
+<span class="n">median_rides</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 
 <span class="c1"># Create the dummy variable F_{it}</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">median_rides</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"F"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">median_rides</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 <span class="c1"># Create the interaction term P_{it} * D_{it}</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'PxD'</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"PxD"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"P"</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">]</span>
 
 <span class="c1"># Create the interaction term F_{it} * D_{it}</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'FxD'</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"FxD"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"F"</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">]</span>
 </pre></div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4c95a012">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In line with the approach proposed by Hall, Palsson, and Price (2018), logarithmic transformations were applied to the set of control variables. The variables considered were the average fare, the maximum number of vehicles in operation within the month, vehicle-hours of service, vehicle-miles of service, regional gas prices, employment statistic, and population size. The motivation is linked to the fluctuation of magnitudes in the control variables, reducing the impact of possible outlier impact, and handle the skewness of distributions.</p>
 </div>
 </div>
 </div>
@@ -7673,17 +7685,27 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Convert 'dateSurvey' to datetime format</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">'dateSurvey'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'dateSurvey'</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'coerce'</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"dateSurvey"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"dateSurvey"</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span>
 
 <span class="c1"># Set the index to be a MultiIndex for panel data</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">'agency_city'</span><span class="p">,</span> <span class="s1">'dateSurvey'</span><span class="p">])</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">"agency_city"</span><span class="p">,</span> <span class="s2">"dateSurvey"</span><span class="p">])</span>
 
 <span class="c1"># Define the dependent variable and independent variables</span>
-<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">])</span>
-<span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
-<span class="n">W</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]]</span>
-<span class="n">PxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'PxD'</span><span class="p">]</span>
-<span class="n">FxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'FxD'</span><span class="p">]</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">])</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">]</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">"popestimate"</span><span class="p">,</span>
+        <span class="s2">"employment"</span><span class="p">,</span>
+        <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+        <span class="s2">"VRHTotal"</span><span class="p">,</span>
+        <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+        <span class="s2">"VRMTotal"</span><span class="p">,</span>
+        <span class="s2">"gasPrice"</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">]</span>
+<span class="n">PxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"PxD"</span><span class="p">]</span>
+<span class="n">FxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"FxD"</span><span class="p">]</span>
 
 <span class="c1"># Scale the independent variables with log transformation</span>
 <span class="n">W_scaled_df</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
@@ -7728,8 +7750,8 @@ a.anchor-link {
 Dep. Variable:               UPTTotal   R-squared:                       0.833
 Model:                            OLS   Adj. R-squared:                  0.833
 Method:                 Least Squares   F-statistic:                 4.463e+04
-Date:                Fri, 07 Jun 2024   Prob (F-statistic):               0.00
-Time:                        20:17:23   Log-Likelihood:                -84548.
+Date:                Sat, 08 Jun 2024   Prob (F-statistic):               0.00
+Time:                        02:11:56   Log-Likelihood:                -84548.
 No. Observations:               71768   AIC:                         1.691e+05
 Df Residuals:                   71759   BIC:                         1.692e+05
 Df Model:                           8                                         
@@ -7767,6 +7789,7 @@ Notes:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>This regression gives us an initial estimation of the effects of Uber presence on public transit ridership, showing a 3.82% increase in ridership, suggesting that Uber complements public transit. Higher population estimates are associated with a decrease in ridership, while higher employment levels are linked to a significant increase. Higher average fares negatively affect ridership, while more vehicle hours and miles significantly increase ridership. The results also suggest that more vehicles in service decrease ridership, and higher gas prices lead to a significant increase in ridership.</p>
 </div>
 </div>
 </div>
@@ -7825,8 +7848,8 @@ Notes:
 Dep. Variable:               UPTTotal   R-squared:                        0.3295
 Estimator:                   PanelOLS   R-squared (Between):              0.9395
 No. Observations:               71768   R-squared (Within):               0.3476
-Date:                Fri, Jun 07 2024   R-squared (Overall):              0.9503
-Time:                        20:17:24   Log-likelihood                   -5543.7
+Date:                Sat, Jun 08 2024   R-squared (Overall):              0.9503
+Time:                        02:11:57   Log-likelihood                   -5543.7
 Cov. Estimator:            Unadjusted                                           
                                         F-statistic:                      4357.3
 Entities:                         676   P-value                           0.0000
@@ -7870,6 +7893,7 @@ Included effects: Entity, Time
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>To account for bias across agencies and within time, we use fixed effects. Using this model, we estimate a 3.54% decrease in ridership, suggesting that Uber substitutes public transit. Higher population estimates are associated with an increase in ridership, in contrast to the previous model, while higher employment levels are linked to an increase. Higher average fares negatively affect ridership, while more vehicle hours and miles significantly increase ridership. The results also suggest that more vehicles in service increase ridership, and, paradoxically, gas prices have a negative but significant effect, unlike in the first OLS model.</p>
 </div>
 </div>
 </div>
@@ -7924,8 +7948,8 @@ Included effects: Entity, Time
 Dep. Variable:               UPTTotal   R-squared:                        0.0103
 Estimator:                   PanelOLS   R-squared (Between):              0.0023
 No. Observations:               71768   R-squared (Within):              -0.0002
-Date:                Fri, Jun 07 2024   R-squared (Overall):              0.0062
-Time:                        20:17:26   Log-likelihood                -1.951e+04
+Date:                Sat, Jun 08 2024   R-squared (Overall):              0.0062
+Time:                        02:11:58   Log-likelihood                -1.951e+04
 Cov. Estimator:            Unadjusted                                           
                                         F-statistic:                      82.066
 Entities:                         676   P-value                           0.0000
@@ -7970,6 +7994,7 @@ Included effects: Entity, Time
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We expand our analysis to examine how the effect of Uber differs based on the population of the MSA. We add $P_{it}$, a dummy variable that takes a value of 1 if the population is larger than the median population in the dataset and 0 otherwise. Using this model, we estimate a 0.75% increase in ridership, which is not statistically significant. Higher average fares negatively affect ridership, while more vehicle hours and miles seem to slightly increase ridership. The results also suggest that more vehicles in service significantly increase ridership, while more vehicle miles slightly decrease it. Again, gas prices do not have a significant effect in this model. Overall, we observe that the majority of the coefficients are very close to 0, with confidence intervals indicating that they could have either a positive or negative overall effect on ridership.</p>
 </div>
 </div>
 </div>
@@ -8024,8 +8049,8 @@ Included effects: Entity, Time
 Dep. Variable:               UPTTotal   R-squared:                        0.0102
 Estimator:                   PanelOLS   R-squared (Between):             -0.0011
 No. Observations:               71768   R-squared (Within):              -0.0011
-Date:                Fri, Jun 07 2024   R-squared (Overall):              0.0029
-Time:                        20:17:26   Log-likelihood                -1.952e+04
+Date:                Sat, Jun 08 2024   R-squared (Overall):              0.0029
+Time:                        02:11:59   Log-likelihood                -1.952e+04
 Cov. Estimator:            Unadjusted                                           
                                         F-statistic:                      81.376
 Entities:                         676   P-value                           0.0000
@@ -8070,6 +8095,94 @@ Included effects: Entity, Time
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Instead of examining how the effect of Uber differs based on the population, we now account for heterogeneity based on the number of riders using public transit before Uber arrived. We add $F_{it}$, a dummy variable that takes a value of 1 if the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies in the dataset. Using this model, we estimate a 3.09% decrease in ridership, suggesting that Uber substitutes public transit. Apart from that important difference, the rest of the control variables are similar in both magnitude and sign to those observed in regression 3.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=93832112">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>$OLS_1$</th>
+<th>$OLS_2$</th>
+<th>$OLS_3$</th>
+<th>$OLS_4$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Intercept</td>
+<td>-0.7976</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>treatUberX</td>
+<td>0.0382</td>
+<td>-0.0354</td>
+<td>0.0075</td>
+<td>-0.0309</td>
+</tr>
+<tr>
+<td>popestimate</td>
+<td>-0.9271</td>
+<td>0.2789</td>
+<td>-9.98e-08</td>
+<td>-1.038e-07</td>
+</tr>
+<tr>
+<td>employment</td>
+<td>0.9909</td>
+<td>0.2677</td>
+<td>1.769e-07</td>
+<td>1.737e-07</td>
+</tr>
+<tr>
+<td>aveFareTotal</td>
+<td>-0.1277</td>
+<td>-0.0996</td>
+<td>-0.0012</td>
+<td>-0.0012</td>
+</tr>
+<tr>
+<td>VRHTotal</td>
+<td>1.3417</td>
+<td>0.3052</td>
+<td>8.564e-07</td>
+<td>8.576e-07</td>
+</tr>
+<tr>
+<td>VOMSTotal</td>
+<td>-0.2376</td>
+<td>0.2314</td>
+<td>0.0005</td>
+<td>0.0005</td>
+</tr>
+<tr>
+<td>VRMTotal</td>
+<td>0.0688</td>
+<td>0.2664</td>
+<td>-2.596e-08</td>
+<td>-2.602e-08</td>
+</tr>
+<tr>
+<td>gasPrice</td>
+<td>0.2136</td>
+<td>-0.0407</td>
+<td>-0.0096</td>
+<td>-0.0101</td>
+</tr>
+</tbody>
+</table>
+<p>Overall, the OLS models indicate that we cannot definitively determine whether the effect of Uber on public transit was complementary or supplementary. The results are not robust across regressions, and therefore, we cannot establish causality. This inconsistency suggests that further analysis with more rigorous methods is needed to understand the true impact of Uber on public transit ridership. Below, we try to address these problems using LASSO and double LASSO regression techniques.</p>
 </div>
 </div>
 </div>
@@ -8103,11 +8216,21 @@ Included effects: Entity, Time
 <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Define the dependent variable and independent variables</span>
-<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">])</span>
-<span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">]</span>
-<span class="n">W</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]]</span>
-<span class="n">PxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'PxD'</span><span class="p">]</span>
-<span class="n">FxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'FxD'</span><span class="p">]</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">])</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">]</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">"popestimate"</span><span class="p">,</span>
+        <span class="s2">"employment"</span><span class="p">,</span>
+        <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+        <span class="s2">"VRHTotal"</span><span class="p">,</span>
+        <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+        <span class="s2">"VRMTotal"</span><span class="p">,</span>
+        <span class="s2">"gasPrice"</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">]</span>
+<span class="n">PxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"PxD"</span><span class="p">]</span>
+<span class="n">FxD</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"FxD"</span><span class="p">]</span>
 
 <span class="c1"># Scale the independent variables with log transformation</span>
 <span class="n">W_scaled_df</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
@@ -8116,12 +8239,12 @@ Included effects: Entity, Time
 <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Encode entity and time as dummy variables</span>
-<span class="n">entity_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'agency_city'</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">time_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'dateSurvey'</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">entity_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"agency_city"</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">time_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"dateSurvey"</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create the design matrices</span>
 <span class="n">X3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">PxD</span><span class="p">,</span> <span class="n">W_scaled_df</span><span class="p">,</span> <span class="n">entity_dummies</span><span class="p">,</span> <span class="n">time_dummies</span><span class="p">))</span>
-<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">])</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -8141,13 +8264,20 @@ Included effects: Entity, Time
 <span class="n">lasso1</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X3</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
 
 <span class="c1"># Define the feature names</span>
-<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'D'</span><span class="p">,</span> <span class="s1">'P'</span><span class="p">,</span> <span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"D"</span><span class="p">,</span>
+    <span class="s2">"P"</span><span class="p">,</span>
+    <span class="s2">"popestimate"</span><span class="p">,</span>
+    <span class="s2">"employment"</span><span class="p">,</span>
+    <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+    <span class="s2">"VRHTotal"</span><span class="p">,</span>
+    <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+    <span class="s2">"VRMTotal"</span><span class="p">,</span>
+    <span class="s2">"gasPrice"</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="c1"># Create DataFrame for Model 1</span>
-<span class="n">coef1_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">'Feature'</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span>
-    <span class="s1">'Coefficient'</span><span class="p">:</span> <span class="n">lasso1</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span>
-<span class="p">})</span>
+<span class="n">coef1_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Feature"</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span> <span class="s2">"Coefficient"</span><span class="p">:</span> <span class="n">lasso1</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]})</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Model 1 Coefficients:"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">coef1_df</span><span class="p">)</span>
@@ -8180,12 +8310,13 @@ Included effects: Entity, Time
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4c95a012">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b4bc6dd">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We are running a LASSO regression to understand which of the covariates in the dataset are the most relevant predictors of public transit ridership. This model includes (P_{it}), a dummy variable that conditions on whether the population is larger than the median population in the dataset. The coefficients for Uber presence (D) and population (P) are both zero, suggesting they do not significantly affect ridership in this context. Employment and vehicle hours appear to be the only significant predictors, both contributing positively to ridership.</p>
 </div>
 </div>
 </div>
@@ -8224,13 +8355,20 @@ Included effects: Entity, Time
 <span class="n">lasso2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X4</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
 
 <span class="c1"># Define the feature names</span>
-<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'D'</span><span class="p">,</span> <span class="s1">'F'</span><span class="p">,</span> <span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"D"</span><span class="p">,</span>
+    <span class="s2">"F"</span><span class="p">,</span>
+    <span class="s2">"popestimate"</span><span class="p">,</span>
+    <span class="s2">"employment"</span><span class="p">,</span>
+    <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+    <span class="s2">"VRHTotal"</span><span class="p">,</span>
+    <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+    <span class="s2">"VRMTotal"</span><span class="p">,</span>
+    <span class="s2">"gasPrice"</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="c1"># Create DataFrame for Model 1</span>
-<span class="n">coef2_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">'Feature'</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span>
-    <span class="s1">'Coefficient'</span><span class="p">:</span> <span class="n">lasso2</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span>
-<span class="p">})</span>
+<span class="n">coef2_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Feature"</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span> <span class="s2">"Coefficient"</span><span class="p">:</span> <span class="n">lasso2</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]})</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Model 2 Coefficients:"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">coef2_df</span><span class="p">)</span>
@@ -8263,12 +8401,85 @@ Included effects: Entity, Time
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b4bc6dd">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f061c0ed">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>This model includes $F_{it}, a dummy variable that conditions on whether the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies before Uber was introduced. The coefficients for Uber presence (D) and the number of riders before Uber (F) are, again, zero, suggesting they do not significantly affect ridership in this context. As in the previous model, employment and vehicle hours appear to be the only significant predictors, both contributing positively to ridership.</p>
+<p>We observe that in both regressions, the non-zero coefficients are the same and identical in magnitude. Two factors contribute to this observation. Firstly, in both regressions, the penalty parameter calculated by the BCHH is identical. Secondly, despite having different treatments, we identify the same subset of variables as important. These factors also lead to the result that the treatments are disregarded, allowing us to conclude that they are not significant predictors of public transit ridership.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bd4c8b61">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>$LASSO_5$</th>
+<th>$LASSO_6$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>DP</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>DF</td>
+<td>N/A</td>
+<td>0</td>
+</tr>
+<tr>
+<td>popestimate</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>employment</td>
+<td>0.009711</td>
+<td>0.009711</td>
+</tr>
+<tr>
+<td>aveFareTotal</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>VRHTotal</td>
+<td>1.170157</td>
+<td>1.170157</td>
+</tr>
+<tr>
+<td>VOMSTotal</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>VRMTotal</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>gasPrice</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -8298,11 +8509,25 @@ Included effects: Entity, Time
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'UPTTotal'</span><span class="p">]),</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-<span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'treatUberX'</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="s1">'popestimate'</span><span class="p">,</span> <span class="s1">'employment'</span><span class="p">,</span> <span class="s1">'aveFareTotal'</span><span class="p">,</span> <span class="s1">'VRHTotal'</span><span class="p">,</span> <span class="s1">'VOMSTotal'</span><span class="p">,</span> <span class="s1">'VRMTotal'</span><span class="p">,</span> <span class="s1">'gasPrice'</span><span class="p">]]))</span>
-<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'P'</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-<span class="n">W1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="o">*</span><span class="n">P</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">]),</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">[</span>
+            <span class="p">[</span>
+                <span class="s2">"popestimate"</span><span class="p">,</span>
+                <span class="s2">"employment"</span><span class="p">,</span>
+                <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+                <span class="s2">"VRHTotal"</span><span class="p">,</span>
+                <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+                <span class="s2">"VRMTotal"</span><span class="p">,</span>
+                <span class="s2">"gasPrice"</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"P"</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span> <span class="o">*</span> <span class="n">P</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
 <span class="n">W2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
 <span class="n">DP</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">P</span>
 
@@ -8316,11 +8541,11 @@ Included effects: Entity, Time
 
 
 <span class="c1"># Run double LASSO regression to estimate alpha for D</span>
-<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W1_combined</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">estimated_beta_1</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W1_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_1:"</span><span class="p">,</span> <span class="n">estimated_beta_1</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
-<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
 </pre></div>
 </div>
@@ -8334,7 +8559,7 @@ Included effects: Entity, Time
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Estimated alpha: 0.1249
+<pre>Estimated beta_1: 0.1249
 Estimated standard error: 0.0335
 Confidence interval: (0.0592, 0.1906)
 </pre>
@@ -8351,11 +8576,11 @@ Confidence interval: (0.0592, 0.1906)
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Run double LASSO regression to estimate alpha for D*P</span>
-<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DP</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">estimated_beta_2</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DP</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_2:"</span><span class="p">,</span> <span class="n">estimated_beta_2</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
-<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
 </pre></div>
 </div>
@@ -8369,7 +8594,7 @@ Confidence interval: (0.0592, 0.1906)
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Estimated alpha: -0.0963
+<pre>Estimated beta_2: -0.0963
 Estimated standard error: 0.0375
 Confidence interval: (-0.1698, -0.0229)
 </pre>
@@ -8378,12 +8603,14 @@ Confidence interval: (-0.1698, -0.0229)
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=371f1a24">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dba95bff">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In this model, $beta_1$ is estimated to be 0.1249 with a standard error of 0.0335. The confidence interval for $beta_1$ is (0.0592, 0.1906), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is positive and statistically significant. This suggests that Uber presence alone is associated with an increase in ridership, indicating that Uber complements public transit.</p>
+<p>Additionally, $beta_2$ is estimated to be -0.0963 with a standard error of 0.0375. The confidence interval for $beta_2$ is (-0.1698, -0.0229), indicating that the interaction effect of having a population above the median and Uber presence ($P_{it} \times D_{it}$) on public transit ridership is negative and statistically significant. This suggests that in areas with a population above the median, Uber presence is associated with a 10% decrease in ridership compared to areas with below-median populations, indicating that Uber substitutes public transit in more populous areas.</p>
 </div>
 </div>
 </div>
@@ -8413,17 +8640,17 @@ Confidence interval: (-0.1698, -0.0229)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'F'</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-<span class="n">W3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="o">*</span><span class="n">F</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"F"</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span> <span class="o">*</span> <span class="n">F</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
 <span class="n">W3_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W3</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">DF</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">F</span>
 
 <span class="c1"># Run double LASSO regression to estimate alpha for D, using F as an instrument</span>
-<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W3_combined</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">estimated_beta_1</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W3_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_1:"</span><span class="p">,</span> <span class="n">estimated_beta_1</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
-<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
 </pre></div>
 </div>
@@ -8437,7 +8664,7 @@ Confidence interval: (-0.1698, -0.0229)
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Estimated alpha: -0.2374
+<pre>Estimated beta_1: -0.2374
 Estimated standard error: 0.0188
 Confidence interval: (-0.2743, -0.2006)
 </pre>
@@ -8454,11 +8681,11 @@ Confidence interval: (-0.2743, -0.2006)
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Run double LASSO regression to estimate alpha for D*F</span>
-<span class="n">estimated_alpha</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DF</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated alpha:"</span><span class="p">,</span> <span class="n">estimated_alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">estimated_beta_2</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DF</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_2:"</span><span class="p">,</span> <span class="n">estimated_beta_2</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
-<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_alpha</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
 </pre></div>
 </div>
@@ -8472,7 +8699,7 @@ Confidence interval: (-0.2743, -0.2006)
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Estimated alpha: 0.5964
+<pre>Estimated beta_2: 0.5964
 Estimated standard error: 0.0224
 Confidence interval: (0.5525, 0.6403)
 </pre>
@@ -8481,12 +8708,80 @@ Confidence interval: (0.5525, 0.6403)
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7c6329db">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=371f1a24">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In this model, $beta_1$ is estimated to be -0.2374 with a standard error of 0.0188. The confidence interval for $beta_1$ is (-0.2743, -0.2006), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is negative and statistically significant. This suggests that Uber presence alone is associated with a decrease in ridership, indicating that Uber substitutes public transit.</p>
+<p>Additionally, $beta_2$ is estimated to be 0.5964 with a standard error of 0.0224. The confidence interval for $beta_2$ is (0.5525, 0.6403), indicating that the interaction effect of having a number of riders above the median and Uber presence ($F_{it} \times D_{it}$) on public transit ridership is positive and statistically significant. This suggests that in areas with a number of riders above the median, Uber presence is associated with a 60% increase in ridership compared to areas with below-median ridership, indicating that Uber complements public transit in areas with higher initial ridership.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e68d4416">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>$Double\,Lasso_7$</th>
+<th>$Double\,Lasso_8$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>0.1249</td>
+<td>-0.2374</td>
+</tr>
+<tr>
+<td>D lower</td>
+<td>0.0592</td>
+<td>-0.2743</td>
+</tr>
+<tr>
+<td>D upper</td>
+<td>0.1906</td>
+<td>-0.2006</td>
+</tr>
+<tr>
+<td>PD</td>
+<td>-0.0963</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>PD lower</td>
+<td>-0.1698</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>PD upper</td>
+<td>-0.0229</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>DF</td>
+<td>N/A</td>
+<td>0.5964</td>
+</tr>
+<tr>
+<td>DF lower</td>
+<td>N/A</td>
+<td>0.5525</td>
+</tr>
+<tr>
+<td>DF upper</td>
+<td>N/A</td>
+<td>0.6403</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -8508,7 +8803,7 @@ Confidence interval: (0.5525, 0.6403)
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=95d56d47">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=39ee1af7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8516,14 +8811,80 @@ Confidence interval: (0.5525, 0.6403)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create polynomial features of 5th order</span>
+<span class="n">poly</span> <span class="o">=</span> <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">W_poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">W_scaled_df</span><span class="p">)</span>
+<span class="n">W_p</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">W_poly</span><span class="p">)</span>
+<span class="n">W_p</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=450a7549">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b91fd5c">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create the design matrices</span>
+<span class="n">X9</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">PxD</span><span class="p">,</span> <span class="n">W_p</span><span class="p">,</span> <span class="n">entity_dummies</span><span class="p">,</span> <span class="n">time_dummies</span><span class="p">))</span>
+
+<span class="c1"># Fit Lasso regression models</span>
+<span class="n">alpha3</span> <span class="o">=</span> <span class="n">BCCH</span><span class="p">(</span><span class="n">X9</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="n">lasso9</span> <span class="o">=</span> <span class="n">Lasso</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha3</span><span class="p">)</span>  <span class="c1"># You can adjust the alpha parameter as needed</span>
+<span class="n">lasso9</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X9</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+<span class="c1"># Define the feature names</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"D"</span><span class="p">,</span>
+    <span class="s2">"PD"</span><span class="p">,</span>
+    <span class="s2">"popestimate"</span><span class="p">,</span>
+    <span class="s2">"employment"</span><span class="p">,</span>
+    <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+    <span class="s2">"VRHTotal"</span><span class="p">,</span>
+    <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+    <span class="s2">"VRMTotal"</span><span class="p">,</span>
+    <span class="s2">"gasPrice"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># Create DataFrame for Model 9</span>
+<span class="n">coef9_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Feature"</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span> <span class="s2">"Coefficient"</span><span class="p">:</span> <span class="n">lasso9</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Model 9 Coefficients:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">coef9_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Model 9 Coefficients:
+        Feature  Coefficient
+0             D         -0.0
+1            PD         -0.0
+2   popestimate         -0.0
+3    employment         -0.0
+4  aveFareTotal         -0.0
+5      VRHTotal          0.0
+6     VOMSTotal          0.0
+7      VRMTotal          0.0
+8      gasPrice          0.0
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7c6329db">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8550,7 +8911,7 @@ Confidence interval: (0.5525, 0.6403)
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c614b499">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1b039d5b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8558,19 +8919,162 @@ Confidence interval: (0.5525, 0.6403)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create the design matrices</span>
+<span class="n">X10</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">FxD</span><span class="p">,</span> <span class="n">W_p</span><span class="p">,</span> <span class="n">entity_dummies</span><span class="p">,</span> <span class="n">time_dummies</span><span class="p">))</span>
+
+<span class="c1"># Fit Lasso regression models</span>
+<span class="n">alpha4</span> <span class="o">=</span> <span class="n">BCCH</span><span class="p">(</span><span class="n">X10</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="n">lasso10</span> <span class="o">=</span> <span class="n">Lasso</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha4</span><span class="p">)</span>  <span class="c1"># You can adjust the alpha parameter as needed</span>
+<span class="n">lasso10</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X10</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+<span class="c1"># Define the feature names</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"D"</span><span class="p">,</span>
+    <span class="s2">"FD"</span><span class="p">,</span>
+    <span class="s2">"popestimate"</span><span class="p">,</span>
+    <span class="s2">"employment"</span><span class="p">,</span>
+    <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+    <span class="s2">"VRHTotal"</span><span class="p">,</span>
+    <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+    <span class="s2">"VRMTotal"</span><span class="p">,</span>
+    <span class="s2">"gasPrice"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># Create DataFrame for Model 10</span>
+<span class="n">coef10_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Feature"</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span> <span class="s2">"Coefficient"</span><span class="p">:</span> <span class="n">lasso10</span><span class="o">.</span><span class="n">coef_</span><span class="p">[:</span><span class="mi">9</span><span class="p">]})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Model 10 Coefficients:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">coef10_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c8516488">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Model 10 Coefficients:
+        Feature  Coefficient
+0             D         -0.0
+1            FD          0.0
+2   popestimate         -0.0
+3    employment         -0.0
+4  aveFareTotal         -0.0
+5      VRHTotal          0.0
+6     VOMSTotal          0.0
+7      VRMTotal          0.0
+8      gasPrice          0.0
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b91fd5c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In both regressions, LASSO penalized all variables, shrinking their coefficients to zero. This outcome suggests that none of the variables, nor their interactions up to the fifth order, are strong predictors of public transit ridership when considering Uber presence and the interaction terms ($P_{it} \times D_{it}$ and $F_{it} \times D_{it}$). The complexity added by considering high-order interactions among the control variables does not enhance the model's ability to predict public transit ridership.</p>
+<p>Given that neither Uber presence nor the high-order interactions of the control variables contribute significantly to the model, we can infer that the direct impact of Uber on public transit ridership, as captured by these models, is minimal. This conclusion aligns with the results from previously estimated, simpler models.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0737bc59">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>$LASSO_5$</th>
+<th>$LASSO_6$</th>
+<th>$LASSO_9$</th>
+<th>$LASSO_{10}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>DP</td>
+<td>0</td>
+<td>N/A</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>DF</td>
+<td>N/A</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>popestimate</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>employment</td>
+<td>0.009711</td>
+<td>0.009711</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>aveFareTotal</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>VRHTotal</td>
+<td>1.170157</td>
+<td>1.170157</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>VOMSTotal</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>VRMTotal</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>gasPrice</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -8592,7 +9096,7 @@ Confidence interval: (0.5525, 0.6403)
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=39ee1af7">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=95d56d47">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8600,19 +9104,108 @@ Confidence interval: (0.5525, 0.6403)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"UPTTotal"</span><span class="p">]),</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"treatUberX"</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">[</span>
+            <span class="p">[</span>
+                <span class="s2">"popestimate"</span><span class="p">,</span>
+                <span class="s2">"employment"</span><span class="p">,</span>
+                <span class="s2">"aveFareTotal"</span><span class="p">,</span>
+                <span class="s2">"VRHTotal"</span><span class="p">,</span>
+                <span class="s2">"VOMSTotal"</span><span class="p">,</span>
+                <span class="s2">"VRMTotal"</span><span class="p">,</span>
+                <span class="s2">"gasPrice"</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"P"</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span> <span class="o">*</span> <span class="n">P</span><span class="p">,</span> <span class="n">W_p</span><span class="p">))</span>
+<span class="n">W2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">W_p</span><span class="p">))</span>
+<span class="n">DP</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">P</span>
+
+<span class="c1"># Convert dummy variables to numpy arrays</span>
+<span class="n">entity_dummies_array</span> <span class="o">=</span> <span class="n">entity_dummies</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">time_dummies_array</span> <span class="o">=</span> <span class="n">time_dummies</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+<span class="c1"># Concatenate the arrays</span>
+<span class="n">W1_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W1</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">W2_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W2</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="c1"># Run double LASSO regression to estimate alpha for D</span>
+<span class="n">estimated_beta_1</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W1_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_1:"</span><span class="p">,</span> <span class="n">estimated_beta_1</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f061c0ed">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated beta_1: 0.0254
+Estimated standard error: 0.0137
+Confidence interval: (-0.0015, 0.0523)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9cec95ac">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Run double LASSO regression to estimate alpha for D*P</span>
+<span class="n">estimated_beta_2</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DP</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_2:"</span><span class="p">,</span> <span class="n">estimated_beta_2</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated beta_2: -0.0092
+Estimated standard error: 0.0142
+Confidence interval: (-0.0371, 0.0187)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c8516488">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In this model, $\beta_1$ is estimated to be 0.0254 with a standard error of 0.0137. The confidence interval for $\beta_1$ is (-0.0015, 0.0523), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is not statistically significant. This suggests that Uber presence alone does not have a significant impact on ridership.</p>
+<p>Additionally, $\beta_2$ is estimated to be -0.0092 with a standard error of 0.0142. The confidence interval for $\beta_2$ is (-0.0371, 0.0187), indicating that the interaction effect of having a population above the median and Uber presence ($P_{it} \times D_{it}$) on public transit ridership is also not statistically significant. This suggests that in areas with a population above the median, Uber presence does not significantly affect ridership.</p>
 </div>
 </div>
 </div>
@@ -8634,7 +9227,7 @@ Confidence interval: (0.5525, 0.6403)
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1b039d5b">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c614b499">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8642,19 +9235,176 @@ Confidence interval: (0.5525, 0.6403)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create Fit</span>
+<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"F"</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">W3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">D</span> <span class="o">*</span> <span class="n">F</span><span class="p">,</span> <span class="n">W_p</span><span class="p">))</span>
+<span class="n">DF</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">F</span>
+
+<span class="c1"># Convert dummy variables to numpy arrays</span>
+<span class="n">entity_dummies_array</span> <span class="o">=</span> <span class="n">entity_dummies</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">time_dummies_array</span> <span class="o">=</span> <span class="n">time_dummies</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+<span class="c1"># Concatenate the arrays</span>
+<span class="n">W3_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">W3</span><span class="p">,</span> <span class="n">entity_dummies_array</span><span class="p">,</span> <span class="n">time_dummies_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Run double LASSO regression to estimate alpha for D</span>
+<span class="n">estimated_beta_1</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">W3_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_1:"</span><span class="p">,</span> <span class="n">estimated_beta_1</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_1</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dba95bff">
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated beta_1: 0.0254
+Estimated standard error: 0.0137
+Confidence interval: (-0.0015, 0.0523)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fd853f1c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Run double LASSO regression to estimate alpha for D*F</span>
+<span class="n">estimated_beta_2</span><span class="p">,</span> <span class="n">estimated_std_error</span> <span class="o">=</span> <span class="n">double_lasso</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">DF</span><span class="p">,</span> <span class="n">W2_combined</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated beta_2:"</span><span class="p">,</span> <span class="n">estimated_beta_2</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estimated standard error:"</span><span class="p">,</span> <span class="n">estimated_std_error</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">max</span> <span class="o">=</span> <span class="n">estimated_beta_2</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">estimated_std_error</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Confidence interval:"</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="nb">max</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Estimated beta_2: 0.5033
+Estimated standard error: 0.0157
+Confidence interval: (0.4725, 0.534)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=750f80e2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In this model, $\beta_1$ is also estimated to be 0.0254 with a standard error of 0.0137. The confidence interval for $\beta_1$ is (-0.0015, 0.0523), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is not statistically significant. This suggests that Uber presence alone does not have a significant impact on ridership.</p>
+<p>Additionally, $\beta_2$ is estimated to be 0.5033 with a standard error of 0.0157. The confidence interval for $\beta_2$ is (0.4725, 0.5340), indicating that the interaction effect of having a number of riders above the median and Uber presence ($F_{it} \times D_{it}$) on public transit ridership is positive and statistically significant. This suggests that in areas with a higher number of initial riders, Uber presence is associated with a 50% increase in ridership compared to areas with below-median ridership, indicating that Uber complements public transit in areas with higher initial ridership. This result is similar to the one observed in Double-LASSO Regression 2, where we estimated this effect to be 60%.</p>
+<p>Finally, we observe that the coefficients for $\beta_1$ from regressions 11 and 12 are identical. This phenomenon can be attributed to the inclusion of the polynomials which results to an exponential increase in the number of features included in the model. This approach adresses the issues of non linearities in the model and provides a robust estimation for the effect of Uber, which remains unaffected by change in the interaction effect fitted.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=812d659e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>$Double\,Lasso_7$</th>
+<th>$Double\,Lasso_8$</th>
+<th>$Double\,Lasso_{11}$</th>
+<th>$Double\,Lasso_{12}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>0.1249</td>
+<td>-0.2374</td>
+<td>0.0254</td>
+<td>0.0254</td>
+</tr>
+<tr>
+<td>D lower</td>
+<td>0.0592</td>
+<td>-0.2743</td>
+<td>-0.0015</td>
+<td>-0.0015</td>
+</tr>
+<tr>
+<td>D upper</td>
+<td>0.1906</td>
+<td>-0.2006</td>
+<td>0.0523</td>
+<td>0.0523</td>
+</tr>
+<tr>
+<td>PD</td>
+<td>-0.0963</td>
+<td>N/A</td>
+<td>-0.0092</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>PD lower</td>
+<td>-0.1698</td>
+<td>N/A</td>
+<td>-0.0371</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>PD upper</td>
+<td>-0.0229</td>
+<td>N/A</td>
+<td>0.0187</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>DF</td>
+<td>N/A</td>
+<td>0.5964</td>
+<td>N/A</td>
+<td>0.5033</td>
+</tr>
+<tr>
+<td>DF lower</td>
+<td>N/A</td>
+<td>0.5525</td>
+<td>N/A</td>
+<td>0.4725</td>
+</tr>
+<tr>
+<td>DF upper</td>
+<td>N/A</td>
+<td>0.6403</td>
+<td>N/A</td>
+<td>0.534</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>

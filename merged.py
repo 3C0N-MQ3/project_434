@@ -69,41 +69,43 @@ from linearmodels.panel import PanelOLS
 from src.BCCH import BCCH
 from src.double_lasso import double_lasso
 from src.double_lasso_OLS import double_lasso_OLS
+
 # %%
 # Load data
 data = pd.read_csv("data/uber_dataset.csv", index_col=0)
 
 # Drop treatGTNotStd variable
-data = data.drop(columns='treatGTNotStd')
+data = data.drop(columns="treatGTNotStd")
 
 # Drop rows with missing values
 data = data.dropna()
 
 # If treatUberX is greater than 0.5, set it to 1, if not, set it to 0
-data['treatUberX'] = (data['treatUberX'] > 0.5).astype(int)
+data["treatUberX"] = (data["treatUberX"] > 0.5).astype(int)
 
 # Create interaction between agency and city
-data['agency_city'] = data['agency'] + data['city']
+data["agency_city"] = data["agency"] + data["city"]
 
-# Calculate the median population 
-data_copy = data[['UPTTotal', 'popestimate', 'city']].copy()
-p = data_copy.groupby(['city']).median()
-median_population = p['popestimate'].median()
+# Calculate the median population
+data_copy = data[["UPTTotal", "popestimate", "city"]].copy()
+p = data_copy.groupby(["city"]).median()
+median_population = p["popestimate"].median()
 
 # Create the dummy variable P_{it}
-data['P'] = (data['popestimate'] > median_population).astype(int)
+data["P"] = (data["popestimate"] > median_population).astype(int)
 
-# Calculate the median rides 
-median_rides = p['UPTTotal'].median()
+# Calculate the median rides
+median_rides = p["UPTTotal"].median()
 
 # Create the dummy variable F_{it}
-data['F'] = (data['UPTTotal'] > median_rides).astype(int)
+data["F"] = (data["UPTTotal"] > median_rides).astype(int)
 
 # Create the interaction term P_{it} * D_{it}
-data['PxD'] = data['P'] * data['treatUberX']
+data["PxD"] = data["P"] * data["treatUberX"]
 
 # Create the interaction term F_{it} * D_{it}
-data['FxD'] = data['F'] * data['treatUberX']
+data["FxD"] = data["F"] * data["treatUberX"]
+
 # %% [markdown]
 # In line with the approach proposed by Hall, Palsson, and Price (2018), logarithmic transformations were applied to the set of control variables. The variables considered were the average fare, the maximum number of vehicles in operation within the month, vehicle-hours of service, vehicle-miles of service, regional gas prices, employment statistic, and population size. The motivation is linked to the fluctuation of magnitudes in the control variables, reducing the impact of possible outlier impact, and handle the skewness of distributions.
 # %% [markdown]
@@ -117,17 +119,27 @@ data['FxD'] = data['F'] * data['treatUberX']
 # </div>
 # %%
 # Convert 'dateSurvey' to datetime format
-data['dateSurvey'] = pd.to_datetime(data['dateSurvey'], errors='coerce')
+data["dateSurvey"] = pd.to_datetime(data["dateSurvey"], errors="coerce")
 
 # Set the index to be a MultiIndex for panel data
-data = data.set_index(['agency_city', 'dateSurvey'])
+data = data.set_index(["agency_city", "dateSurvey"])
 
 # Define the dependent variable and independent variables
-Y = np.log(data['UPTTotal'])
-D = data['treatUberX']
-W = data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]
-PxD = data['PxD']
-FxD = data['FxD']
+Y = np.log(data["UPTTotal"])
+D = data["treatUberX"]
+W = data[
+    [
+        "popestimate",
+        "employment",
+        "aveFareTotal",
+        "VRHTotal",
+        "VOMSTotal",
+        "VRMTotal",
+        "gasPrice",
+    ]
+]
+PxD = data["PxD"]
+FxD = data["FxD"]
 
 # Scale the independent variables with log transformation
 W_scaled_df = np.log(W)
@@ -144,6 +156,7 @@ model1 = sm.OLS(Y, X).fit()
 
 # Print the results
 print(model1.summary())
+
 # %% [markdown]
 """
 This regression gives us an initial estimation of the effects of Uber presence on public transit ridership, showing a 3.82% increase in ridership, suggesting that Uber complements public transit. Higher population estimates are associated with a decrease in ridership, while higher employment levels are linked to a significant increase. Higher average fares negatively affect ridership, while more vehicle hours and miles significantly increase ridership. The results also suggest that more vehicles in service decrease ridership, and higher gas prices lead to a significant increase in ridership.
@@ -170,6 +183,7 @@ result2 = model2.fit()
 
 # Print the summaries to check the fixed effects inclusion
 print(result2.summary)
+
 # %% [markdown]
 # To account for bias across agencies and within time, we use fixed effects. Using this model, we estimate a 3.54% decrease in ridership, suggesting that Uber substitutes public transit. Higher population estimates are associated with an increase in ridership, in contrast to the previous model, while higher employment levels are linked to an increase. Higher average fares negatively affect ridership, while more vehicle hours and miles significantly increase ridership. The results also suggest that more vehicles in service increase ridership, and, paradoxically, gas prices have a negative but significant effect, unlike in the first OLS model.
 # %% [markdown]
@@ -190,6 +204,7 @@ model3 = PanelOLS(Y, X1, entity_effects=True, time_effects=True, drop_absorbed=T
 result3 = model3.fit()
 
 print(result3.summary)
+
 # %% [markdown]
 # We expand our analysis to examine how the effect of Uber differs based on the population of the MSA. We add $P_{it}$, a dummy variable that takes a value of 1 if the population is larger than the median population in the dataset and 0 otherwise. Using this model, we estimate a 0.75% increase in ridership, which is not statistically significant. Higher average fares negatively affect ridership, while more vehicle hours and miles seem to slightly increase ridership. The results also suggest that more vehicles in service significantly increase ridership, while more vehicle miles slightly decrease it. Again, gas prices do not have a significant effect in this model. Overall, we observe that the majority of the coefficients are very close to 0, with confidence intervals indicating that they could have either a positive or negative overall effect on ridership.
 # %% [markdown]
@@ -210,6 +225,7 @@ model4 = PanelOLS(Y, X2, entity_effects=True, time_effects=True, drop_absorbed=T
 result4 = model4.fit()
 
 print(result4.summary)
+
 # %% [markdown]
 # Instead of examining how the effect of Uber differs based on the population, we now account for heterogeneity based on the number of riders using public transit before Uber arrived. We add $F_{it}$, a dummy variable that takes a value of 1 if the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies in the dataset. Using this model, we estimate a 3.09% decrease in ridership, suggesting that Uber substitutes public transit. Apart from that important difference, the rest of the control variables are similar in both magnitude and sign to those observed in regression 3.
 # %% [markdown]
@@ -243,11 +259,21 @@ Overall, the OLS models indicate that we cannot definitively determine whether t
 data.reset_index(inplace=True)
 
 # Define the dependent variable and independent variables
-Y = np.log(data['UPTTotal'])
-D = data['treatUberX']
-W = data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]
-PxD = data['PxD']
-FxD = data['FxD']
+Y = np.log(data["UPTTotal"])
+D = data["treatUberX"]
+W = data[
+    [
+        "popestimate",
+        "employment",
+        "aveFareTotal",
+        "VRHTotal",
+        "VOMSTotal",
+        "VRMTotal",
+        "gasPrice",
+    ]
+]
+PxD = data["PxD"]
+FxD = data["FxD"]
 
 # Scale the independent variables with log transformation
 W_scaled_df = np.log(W)
@@ -256,12 +282,12 @@ W_scaled_df = np.log(W)
 X = pd.concat([D, W_scaled_df], axis=1)
 
 # Encode entity and time as dummy variables
-entity_dummies = pd.get_dummies(data['agency_city'], drop_first=True)
-time_dummies = pd.get_dummies(data['dateSurvey'], drop_first=True)
+entity_dummies = pd.get_dummies(data["agency_city"], drop_first=True)
+time_dummies = pd.get_dummies(data["dateSurvey"], drop_first=True)
 
 # Create the design matrices
 X3 = np.column_stack((D, PxD, W_scaled_df, entity_dummies, time_dummies))
-Y = np.log(data['UPTTotal'])
+Y = np.log(data["UPTTotal"])
 
 # %%
 # Fit Lasso regression models
@@ -270,18 +296,26 @@ lasso1 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
 lasso1.fit(X3, Y)
 
 # Define the feature names
-feature_names = ['D', 'P', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+feature_names = [
+    "D",
+    "P",
+    "popestimate",
+    "employment",
+    "aveFareTotal",
+    "VRHTotal",
+    "VOMSTotal",
+    "VRMTotal",
+    "gasPrice",
+]
 
 # Create DataFrame for Model 1
-coef1_df = pd.DataFrame({
-    'Feature': feature_names,
-    'Coefficient': lasso1.coef_[:9]
-})
+coef1_df = pd.DataFrame({"Feature": feature_names, "Coefficient": lasso1.coef_[:9]})
 
 print("Model 1 Coefficients:")
 print(coef1_df)
+
 # %% [markdown]
-#
+# We are running a LASSO regression to understand which of the covariates in the dataset are the most relevant predictors of public transit ridership. This model includes \(P_{it}\), a dummy variable that conditions on whether the population is larger than the median population in the dataset. The coefficients for Uber presence (D) and population (P) are both zero, suggesting they do not significantly affect ridership in this context. Employment and vehicle hours appear to be the only significant predictors, both contributing positively to ridership.
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -301,18 +335,28 @@ lasso2 = Lasso(alpha=alpha1)  # You can adjust the alpha parameter as needed
 lasso2.fit(X4, Y)
 
 # Define the feature names
-feature_names = ['D', 'F', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+feature_names = [
+    "D",
+    "F",
+    "popestimate",
+    "employment",
+    "aveFareTotal",
+    "VRHTotal",
+    "VOMSTotal",
+    "VRMTotal",
+    "gasPrice",
+]
 
 # Create DataFrame for Model 1
-coef2_df = pd.DataFrame({
-    'Feature': feature_names,
-    'Coefficient': lasso2.coef_[:9]
-})
+coef2_df = pd.DataFrame({"Feature": feature_names, "Coefficient": lasso2.coef_[:9]})
 
 print("Model 2 Coefficients:")
 print(coef2_df)
+
 # %% [markdown]
+# This model includes $F_{it}, a dummy variable that conditions on whether the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies before Uber was introduced. The coefficients for Uber presence (D) and the number of riders before Uber (F) are, again, zero, suggesting they do not significantly affect ridership in this context. As in the previous model, employment and vehicle hours appear to be the only significant predictors, both contributing positively to ridership. 
 #
+# We observe that in both regressions, the non-zero coefficients are the same and identical in magnitude. Two factors contribute to this observation. Firstly, in both regressions, the penalty parameter calculated by the BCHH is identical. Secondly, despite having different treatments, we identify the same subset of variables as important. These factors also lead to the result that the treatments are disregarded, allowing us to conclude that they are not significant predictors of public transit ridership.
 # %% [markdown]
 """
 | Variable     | $LASSO_5$ | $LASSO_6$ |
@@ -338,11 +382,25 @@ print(coef2_df)
 #     </div>
 # </div>
 # %%
-Y = np.array(np.log(data['UPTTotal']), ndmin=1).T
-D = np.array(data['treatUberX'], ndmin=1).T
-W = np.array(np.log(data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]))
-P = np.array(data['P'], ndmin=1).T
-W1 = np.column_stack((D*P, W))
+Y = np.array(np.log(data["UPTTotal"]), ndmin=1).T
+D = np.array(data["treatUberX"], ndmin=1).T
+W = np.array(
+    np.log(
+        data[
+            [
+                "popestimate",
+                "employment",
+                "aveFareTotal",
+                "VRHTotal",
+                "VOMSTotal",
+                "VRMTotal",
+                "gasPrice",
+            ]
+        ]
+    )
+)
+P = np.array(data["P"], ndmin=1).T
+W1 = np.column_stack((D * P, W))
 W2 = np.column_stack((D, W))
 DP = D * P
 
@@ -370,8 +428,13 @@ print("Estimated standard error:", estimated_std_error.round(4))
 min = estimated_beta_2 - 1.96 * estimated_std_error
 max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
+
 # %% [markdown]
-#
+r"""
+In this model, $beta_1$ is estimated to be 0.1249 with a standard error of 0.0335. The confidence interval for $beta_1$ is (0.0592, 0.1906), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is positive and statistically significant. This suggests that Uber presence alone is associated with an increase in ridership, indicating that Uber complements public transit.
+
+Additionally, $beta_2$ is estimated to be -0.0963 with a standard error of 0.0375. The confidence interval for $beta_2$ is (-0.1698, -0.0229), indicating that the interaction effect of having a population above the median and Uber presence ($P_{it} \times D_{it}$) on public transit ridership is negative and statistically significant. This suggests that in areas with a population above the median, Uber presence is associated with a 10% decrease in ridership compared to areas with below-median populations, indicating that Uber substitutes public transit in more populous areas.
+"""
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -382,8 +445,8 @@ print("Confidence interval:", (min.round(4), max.round(4)))
 #     </div>
 # </div>
 # %%
-F = np.array(data['F'], ndmin=1).T
-W3 = np.column_stack((D*F, W))
+F = np.array(data["F"], ndmin=1).T
+W3 = np.column_stack((D * F, W))
 W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axis=1)
 DF = D * F
 
@@ -403,8 +466,11 @@ print("Estimated standard error:", estimated_std_error.round(4))
 min = estimated_beta_2 - 1.96 * estimated_std_error
 max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
+
 # %% [markdown]
+# In this model, $beta_1$ is estimated to be -0.2374 with a standard error of 0.0188. The confidence interval for $beta_1$ is (-0.2743, -0.2006), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is negative and statistically significant. This suggests that Uber presence alone is associated with a decrease in ridership, indicating that Uber substitutes public transit.
 #
+# Additionally, $beta_2$ is estimated to be 0.5964 with a standard error of 0.0224. The confidence interval for $beta_2$ is (0.5525, 0.6403), indicating that the interaction effect of having a number of riders above the median and Uber presence ($F_{it} \times D_{it}$) on public transit ridership is positive and statistically significant. This suggests that in areas with a number of riders above the median, Uber presence is associated with a 60% increase in ridership compared to areas with below-median ridership, indicating that Uber complements public transit in areas with higher initial ridership.
 # %% [markdown]
 r"""
 | Variable | $Double\,Lasso_7$ | $Double\,Lasso_8$ |
@@ -433,7 +499,7 @@ r"""
 poly = PolynomialFeatures(degree=5)
 W_poly = poly.fit_transform(W_scaled_df)
 W_p = pd.DataFrame(W_poly)
-W_p.drop(columns= 0, inplace=True)
+W_p.drop(columns=0, inplace=True)
 
 # %%
 # Create the design matrices
@@ -445,13 +511,20 @@ lasso9 = Lasso(alpha=alpha3)  # You can adjust the alpha parameter as needed
 lasso9.fit(X9, Y)
 
 # Define the feature names
-feature_names = ['D', 'PD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+feature_names = [
+    "D",
+    "PD",
+    "popestimate",
+    "employment",
+    "aveFareTotal",
+    "VRHTotal",
+    "VOMSTotal",
+    "VRMTotal",
+    "gasPrice",
+]
 
 # Create DataFrame for Model 9
-coef9_df = pd.DataFrame({
-    'Feature': feature_names,
-    'Coefficient': lasso9.coef_[:9]
-})
+coef9_df = pd.DataFrame({"Feature": feature_names, "Coefficient": lasso9.coef_[:9]})
 
 print("Model 9 Coefficients:")
 print(coef9_df)
@@ -477,18 +550,28 @@ lasso10 = Lasso(alpha=alpha4)  # You can adjust the alpha parameter as needed
 lasso10.fit(X10, Y)
 
 # Define the feature names
-feature_names = ['D', 'FD', 'popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']
+feature_names = [
+    "D",
+    "FD",
+    "popestimate",
+    "employment",
+    "aveFareTotal",
+    "VRHTotal",
+    "VOMSTotal",
+    "VRMTotal",
+    "gasPrice",
+]
 
 # Create DataFrame for Model 10
-coef10_df = pd.DataFrame({
-    'Feature': feature_names,
-    'Coefficient': lasso10.coef_[:9]
-})
+coef10_df = pd.DataFrame({"Feature": feature_names, "Coefficient": lasso10.coef_[:9]})
 
 print("Model 10 Coefficients:")
 print(coef10_df)
+
 # %% [markdown]
+# In both regressions, LASSO penalized all variables, shrinking their coefficients to zero. This outcome suggests that none of the variables, nor their interactions up to the fifth order, are strong predictors of public transit ridership when considering Uber presence and the interaction terms ($P_{it} \times D_{it}$ and $F_{it} \times D_{it}$). The complexity added by considering high-order interactions among the control variables does not enhance the model's ability to predict public transit ridership.
 #
+# Given that neither Uber presence nor the high-order interactions of the control variables contribute significantly to the model, we can infer that the direct impact of Uber on public transit ridership, as captured by these models, is minimal. This conclusion aligns with the results from previously estimated, simpler models.
 # %% [markdown]
 """
 | Variable     | $LASSO_5$ | $LASSO_6$ | $LASSO_9$ | $LASSO_{10}$ |
@@ -514,11 +597,25 @@ print(coef10_df)
 #     </div>
 # </div>
 # %%
-Y = np.array(np.log(data['UPTTotal']), ndmin=1).T
-D = np.array(data['treatUberX'], ndmin=1).T
-W = np.array(np.log(data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]))
-P = np.array(data['P'], ndmin=1).T
-W1 = np.column_stack((D*P, W_p))
+Y = np.array(np.log(data["UPTTotal"]), ndmin=1).T
+D = np.array(data["treatUberX"], ndmin=1).T
+W = np.array(
+    np.log(
+        data[
+            [
+                "popestimate",
+                "employment",
+                "aveFareTotal",
+                "VRHTotal",
+                "VOMSTotal",
+                "VRMTotal",
+                "gasPrice",
+            ]
+        ]
+    )
+)
+P = np.array(data["P"], ndmin=1).T
+W1 = np.column_stack((D * P, W_p))
 W2 = np.column_stack((D, W_p))
 DP = D * P
 
@@ -547,8 +644,11 @@ print("Estimated standard error:", estimated_std_error.round(4))
 min = estimated_beta_2 - 1.96 * estimated_std_error
 max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
+
 # %% [markdown]
+# In this model, $\beta_1$ is estimated to be 0.0254 with a standard error of 0.0137. The confidence interval for $\beta_1$ is (-0.0015, 0.0523), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is not statistically significant. This suggests that Uber presence alone does not have a significant impact on ridership.
 #
+# Additionally, $\beta_2$ is estimated to be -0.0092 with a standard error of 0.0142. The confidence interval for $\beta_2$ is (-0.0371, 0.0187), indicating that the interaction effect of having a population above the median and Uber presence ($P_{it} \times D_{it}$) on public transit ridership is also not statistically significant. This suggests that in areas with a population above the median, Uber presence does not significantly affect ridership.
 # %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
@@ -559,10 +659,9 @@ print("Confidence interval:", (min.round(4), max.round(4)))
 #     </div>
 # </div>
 # %%
-
 # Create Fit
-F = np.array(data['F'], ndmin=1).T
-W3 = np.column_stack((D*F, W_p))
+F = np.array(data["F"], ndmin=1).T
+W3 = np.column_stack((D * F, W_p))
 DF = D * F
 
 # Convert dummy variables to numpy arrays
@@ -590,7 +689,11 @@ max = estimated_beta_2 + 1.96 * estimated_std_error
 print("Confidence interval:", (min.round(4), max.round(4)))
 
 # %% [markdown]
+# In this model, $\beta_1$ is also estimated to be 0.0254 with a standard error of 0.0137. The confidence interval for $\beta_1$ is (-0.0015, 0.0523), indicating that the effect of Uber presence ($D_{it}$) on public transit ridership is not statistically significant. This suggests that Uber presence alone does not have a significant impact on ridership.
 #
+# Additionally, $\beta_2$ is estimated to be 0.5033 with a standard error of 0.0157. The confidence interval for $\beta_2$ is (0.4725, 0.5340), indicating that the interaction effect of having a number of riders above the median and Uber presence ($F_{it} \times D_{it}$) on public transit ridership is positive and statistically significant. This suggests that in areas with a higher number of initial riders, Uber presence is associated with a 50% increase in ridership compared to areas with below-median ridership, indicating that Uber complements public transit in areas with higher initial ridership. This result is similar to the one observed in Double-LASSO Regression 2, where we estimated this effect to be 60%.
+#
+# Finally, we observe that the coefficients for $\beta_1$ from regressions 11 and 12 are identical. This phenomenon can be attributed to the inclusion of the polynomials which results to an exponential increase in the number of features included in the model. This approach adresses the issues of non linearities in the model and provides a robust estimation for the effect of Uber, which remains unaffected by change in the interaction effect fitted.
 # %% [markdown]
 r"""
 | Variable | $Double\,Lasso_7$ | $Double\,Lasso_8$ | $Double\,Lasso_{11}$ | $Double\,Lasso_{12}$ |
