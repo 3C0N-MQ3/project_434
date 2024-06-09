@@ -1,7 +1,6 @@
-
 # Create Fit
-F = np.array(data['F'], ndmin=1).T
-W3 = np.column_stack((D*F, W_p))
+F = np.array(data["F"], ndmin=1).T
+W3 = np.column_stack((D * F, W_p))
 DF = D * F
 
 # Convert dummy variables to numpy arrays

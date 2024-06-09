@@ -1,8 +1,22 @@
-Y = np.array(np.log(data['UPTTotal']), ndmin=1).T
-D = np.array(data['treatUberX'], ndmin=1).T
-W = np.array(np.log(data[['popestimate', 'employment', 'aveFareTotal', 'VRHTotal', 'VOMSTotal', 'VRMTotal', 'gasPrice']]))
-P = np.array(data['P'], ndmin=1).T
-W1 = np.column_stack((D*P, W))
+Y = np.array(np.log(data["UPTTotal"]), ndmin=1).T
+D = np.array(data["treatUberX"], ndmin=1).T
+W = np.array(
+    np.log(
+        data[
+            [
+                "popestimate",
+                "employment",
+                "aveFareTotal",
+                "VRHTotal",
+                "VOMSTotal",
+                "VRMTotal",
+                "gasPrice",
+            ]
+        ]
+    )
+)
+P = np.array(data["P"], ndmin=1).T
+W1 = np.column_stack((D * P, W))
 W2 = np.column_stack((D, W))
 DP = D * P
 

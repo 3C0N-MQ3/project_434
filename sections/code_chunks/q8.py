@@ -1,5 +1,5 @@
-F = np.array(data['F'], ndmin=1).T
-W3 = np.column_stack((D*F, W))
+F = np.array(data["F"], ndmin=1).T
+W3 = np.column_stack((D * F, W))
 W3_combined = np.concatenate([W3, entity_dummies_array, time_dummies_array], axis=1)
 DF = D * F
 
