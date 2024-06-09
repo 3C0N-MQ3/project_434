@@ -226,6 +226,57 @@ result4 = model4.fit()
 
 print(result4.summary)
 
+# %%
+#Create Residuals
+ols3_res= result3.resids
+ols4_res = result4.resids
+
+fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 7), constrained_layout=True)
+
+# First plot
+axes[0].scatter(ols3_res, np.log(data['UPTTotal']), label='Residuals', 
+                color='b', alpha=0.6, edgecolor='w', s=80)
+axes[0].set_xlabel('Residuals', fontsize=12)
+axes[0].set_ylabel('Log of UPTTotal', fontsize=12)
+axes[0].set_title('Residuals vs. UPTTotal for OLS with DP Interaction', fontsize=14)
+axes[0].legend()
+axes[0].grid(True, which='both', linestyle='--', linewidth=0.7)
+
+# Second plot
+axes[1].scatter(ols4_res, np.log(data['UPTTotal']), label='Residuals', 
+                color='r', alpha=0.6, edgecolor='w', s=80)
+axes[1].set_xlabel('Residuals', fontsize=12)
+axes[1].set_ylabel('Log of UPTTotal', fontsize=12)
+axes[1].set_title('Residuals vs. UPTTotal for OLS with DF Interaction', fontsize=14)
+axes[1].legend()
+axes[1].grid(True, which='both', linestyle='--', linewidth=0.7)
+
+plt.show()
+# %%
+# Create Figure
+obs_count = list(range(1, len(ols3_res) + 1))
+
+fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 7), constrained_layout=True)
+
+# First plot
+axes[0].plot(obs_count, ols3_res, label='Residual', color='b', linewidth=2, 
+             marker='o', markersize=5, markerfacecolor='white')
+axes[0].set_xlabel('Observation', fontsize=12)
+axes[0].set_ylabel('Residuals', fontsize=12)
+axes[0].set_title('Residuals with DP Interaction', fontsize=14)
+axes[0].legend()
+axes[0].grid(True, which='both', linestyle='--', linewidth=0.7)
+
+# Second plot
+axes[1].plot(obs_count, ols4_res, label='Residual', color='r', linewidth=2, 
+             marker='o', markersize=5, markerfacecolor='white')
+axes[1].set_xlabel('Observation', fontsize=12)
+axes[1].set_ylabel('Residual', fontsize=12)
+axes[1].set_title('Residuals OLS with DF Interaction', fontsize=14)
+axes[1].legend()
+axes[1].grid(True, which='both', linestyle='--', linewidth=0.7)
+
+plt.show()
 # %% [markdown]
 # Instead of examining how the effect of Uber differs based on the population, we now account for heterogeneity based on the number of riders using public transit before Uber arrived. We add $F_{it}$, a dummy variable that takes a value of 1 if the number of rides of the public transit agency is larger than the median number of rides among all public transit agencies in the dataset. Using this model, we estimate a 3.09% decrease in ridership, suggesting that Uber substitutes public transit. Apart from that important difference, the rest of the control variables are similar in both magnitude and sign to those observed in regression 3.
 # %% [markdown]
@@ -708,3 +759,15 @@ r"""
 | DF lower | N/A               | 0.5525            | N/A                  | 0.4725               |
 | DF upper | N/A               | 0.6403            | N/A                  | 0.534                |
 """
+# %% [markdown]
+# ## Conclusion
+#
+# The purpose of this study is to examine the causal effects of Uber presence on public transit ridership. The goal is to determine whether Uber can substitute for public transit, for example, if riders choose Uber instead of public transit, or whether it can complement public transit, for example, if riders take Uber from home to a public transit stop, thereby making public transit more attractive than driving a car.
+#
+# We use three different approaches for this problem: OLS, Lasso, and Double Lasso, all of which include fixed effects for public transport agencies and time. Along with the Uber treatment, in each approach we also test interactions for population and pre-Uber public rides, as well as different control variables.
+#
+# As mentioned in the relevant section, the OLS models indicate that we cannot definitively determine whether the effect of Uber on public transit was complementary or supplementary. In terms of causality, none of the coefficients can be directly interpreted in a causal form because of the endogeneity problem in the error term. This means there is no orthogonality between the error term and the treatment.
+#
+# The purpose of using Lasso combined with the BCCH λ selection method is to leverage the oracle property of this method. This means we select the most important covariates explaining changes in the dependent variable. We observe that in all the Lasso regressions (5, 6, 9, 10) the Uber treatment is excluded, along with the interactions of this covariate we have included. This suggests an undefinable relationship between the treatment and public transit ridership. However, we can't make any causal conclusions due to the same orthogonality issue with the error terms, which is now exacerbated by the inclusion of Lasso-generated bias.
+#
+# To address the issue of orthogonality with the error term, we apply Double Lasso. In the first setting $(Double\,Lasso_7, Double\,Lasso_8)$, we include only linear covariates, observing highly variable estimation of the Uber treatment. This variability is explained by the misspecification problem in the two Double Lasso regression stages. This happens because the quality of the Double Lasso also depends on the strength of the orthogonality between the error terms of the dependent and independent variables (ε) and the treatment effect and controls (ν) in the two stages of the method. This issue is addressed by including polynomial features to the 5th power of the control variables $(Double\,Lasso_{11}, Double\,Lasso_{12})$, recalling the function approximation property of Taylor Series expansions. By using this setting, we conclude that the Uber treatment is significantly positive and robust to the inclusion of interactions between the treatment and other covariates.
