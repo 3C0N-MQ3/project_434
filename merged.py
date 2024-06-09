@@ -105,6 +105,8 @@ data['PxD'] = data['P'] * data['treatUberX']
 # Create the interaction term F_{it} * D_{it}
 data['FxD'] = data['F'] * data['treatUberX']
 # %% [markdown]
+# In line with the approach proposed by Hall, Palsson, and Price (2018), logarithmic transformations were applied to the set of control variables. The variables considered were the average fare, the maximum number of vehicles in operation within the month, vehicle-hours of service, vehicle-miles of service, regional gas prices, employment statistic, and population size. The motivation is linked to the fluctuation of magnitudes in the control variables, reducing the impact of possible outlier impact, and handle the skewness of distributions.
+# %% [markdown]
 # <div style="border: 1px solid black; border-radius: 5px; overflow: hidden;">
 #     <div style="background-color: black; color: white; padding: 5px; text-align: left;">
 #         1.)
